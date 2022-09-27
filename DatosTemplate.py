@@ -8,49 +8,45 @@ import pandas as pd
 
 class Datos:
 
-
-
     # Constructor: procesar el fichero para asignar correctamente las variables nominalAtributos, datos y diccionarios
     def __init__(self, nombreFichero):
         #TODO: settear los valores correctamente a nominalAtributos : [lista de booleanos que indica, para cada header si es nominal o numerico]
-        self.nominalAtributos = False
-        #datos = pd.DataFrame(d) donde d es un {"columnName1":[data],"columnName2":[data]}
+        self.nominalAtributos = []
         self.datos = {}
-        self.diccionario = None
+        self.diccionario = {}
         #obtengo el objeto file
         file = open(nombreFichero)
-        csvReader = csv.reader(file)  
-        
+        csvReader = csv.reader(file)          
         self.getOrderedDict(csvReader)
         #llamada a getRowByPosOrdered -> devuelve un diccionario ordenado alfabeticamente con clave el atributo de entrada, y valor una secuencia numerica
         
         
         #self.getOrderedDict(csvReader)    
-            
-    
-    
-    
-    
-    
-    
     
     def getHeaders(self,csvReader):
-        headers = next(csvReader)
+        headers = next(csvReader)    
         return headers
         
             
 
     def getOrderedDict(self,csvReader):
         headers = self.getHeaders(csvReader)
-        
         rows = []
         for row in csvReader:
             rows.append(row)
+        for h in rows[0]:
+            if(h.isnumeric()):
+                self.nominalAtributos.append(False)
+            else:
+                self.nominalAtributos.append(True)
+
         counter = 0
         primero = []
         
         for h in headers:
+            
             primero.append([])
+
             for fila in rows:
                 primero[counter].append(fila[counter])
                 ##TODO: la insercion de los datos no es directa, sino que es el valor ordenador alfabeticamente
@@ -64,24 +60,44 @@ class Datos:
             counter += 1
         
         self.datos = pd.DataFrame(d)
-        print(self.datos)
-        print(self.prueba(headers))
-        '''for elem in headers:
-            
-            self.datos[headers] = [item[counter] for item in rows]
-            counter += 1
-            print(rows[:][counter])'''
 
+        counter = 0
+        for h in headers:
+            self.diccionario[h] = self.getDict(h,self.nominalAtributos[counter])
+            counter += 1
+
+        '''print(self.datos)
+        print(self.diccionario)'''
+
+        counter = 0
+        print(len(headers))
+        print(len(self.nominalAtributos))
+        '''for h in headers:
+            print(h)
+            if (self.nominalAtributos[counter] is True):
+                print(self.datos[h])
+                for elem in self.datos[h]:
+                    self.datos.replace(self.datos,self.diccionario[h][elem]) 
+                    pass
+        counter += 1'''
+        print(self.diccionario)
+        miDataFrameMOdificado = self.datos.replace(self.diccionario,inplace = False) 
+        print(miDataFrameMOdificado)
+        print(self.datos)
+        
+        
 
     #llamar a este metodo por cada header, y obtener el diccionario. Una vez obtenido, crear 
-    def getDict(self,headers, index):
-        secuencia = 0
-        sample_set = set(self.datos[headers[i]]) 
-        print(sample_set)
+    def getDict(self,header,bandera):
+        secuencia = 1
+        sample_set = set(self.datos[header]) 
+        sample_set = sorted(sample_set)
         temp = {}
-        for elem in sample_set:
-            temp[elem] = secuencia
-            secuencia += 1
+        if(bandera == True):
+            for elem in sample_set:
+                temp[elem] = secuencia
+                secuencia += 1
+        
         return temp
         
     # Devuelve el subconjunto de los datos cuyos �ndices se pasan como argumento
