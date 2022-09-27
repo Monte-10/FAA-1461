@@ -10,19 +10,13 @@ class Datos:
 
     # Constructor: procesar el fichero para asignar correctamente las variables nominalAtributos, datos y diccionarios
     def __init__(self, nombreFichero):
-        #TODO: settear los valores correctamente a nominalAtributos : [lista de booleanos que indica, para cada header si es nominal o numerico]
         self.nominalAtributos = []
         self.datos = {}
         self.diccionario = {}
-        #obtengo el objeto file
         file = open(nombreFichero)
         csvReader = csv.reader(file)          
         self.getOrderedDict(csvReader)
-        #llamada a getRowByPosOrdered -> devuelve un diccionario ordenado alfabeticamente con clave el atributo de entrada, y valor una secuencia numerica
         
-        
-        #self.getOrderedDict(csvReader)    
-    
     def getHeaders(self,csvReader):
         headers = next(csvReader)    
         return headers
@@ -52,42 +46,22 @@ class Datos:
                 ##TODO: la insercion de los datos no es directa, sino que es el valor ordenador alfabeticamente
             counter += 1        
         
-        #llegado a este punto tengo una lista por header. tengo que contruir ahora el dataframe de forma que {"header"  : lista[header]}
         counter = 0
         d = {}
         for elem in headers:
             d[elem] = primero[counter]
             counter += 1
         
+        #CREA el dataFrame a partir de los datos
         self.datos = pd.DataFrame(d)
-
+        
         counter = 0
         for h in headers:
             self.diccionario[h] = self.getDict(h,self.nominalAtributos[counter])
-            counter += 1
-
-        '''print(self.datos)
-        print(self.diccionario)'''
-
-        counter = 0
-        print(len(headers))
-        print(len(self.nominalAtributos))
-        '''for h in headers:
-            print(h)
-            if (self.nominalAtributos[counter] is True):
-                print(self.datos[h])
-                for elem in self.datos[h]:
-                    self.datos.replace(self.datos,self.diccionario[h][elem]) 
-                    pass
-        counter += 1'''
-        print(self.diccionario)
-        miDataFrameMOdificado = self.datos.replace(self.diccionario,inplace = False) 
-        print(miDataFrameMOdificado)
+            counter += 1    
+        self.datos.replace(self.diccionario,inplace = True) 
         print(self.datos)
         
-        
-
-    #llamar a este metodo por cada header, y obtener el diccionario. Una vez obtenido, crear 
     def getDict(self,header,bandera):
         secuencia = 1
         sample_set = set(self.datos[header]) 
@@ -99,7 +73,8 @@ class Datos:
                 secuencia += 1
         
         return temp
-        
+    
+    
     # Devuelve el subconjunto de los datos cuyos �ndices se pasan como argumento
     def extraeDatos(self,idx):
         pass
