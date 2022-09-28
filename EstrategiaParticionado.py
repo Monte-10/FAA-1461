@@ -9,6 +9,10 @@ class Particion():
     self.indicesTrain=[]
     self.indicesTest=[]
 
+  def __str__(self):
+    return "Indices entrenamiento:" + str(self.indicesTrain) + "\nIndices Test " + str(self.indicesTest)
+    
+
 #####################################################################################################
 
 class EstrategiaParticionado:
@@ -25,6 +29,12 @@ class EstrategiaParticionado:
   # TODO: esta funcion deben ser implementadas en cada estrategia concreta  
   def creaParticiones(self,datos,seed=None):
     pass
+
+  def __str__(self) -> str:
+    cadena = ""
+    for eleme in self.particiones:
+      cadena += str(eleme) + "\n"
+    return cadena
   
 
 #####################################################################################################
@@ -60,6 +70,8 @@ class ValidacionSimple(EstrategiaParticionado):
 
       self.particiones[-1].indicesTest = valores[:longitudTest]
       self.particiones[-1].indicesTrain = valores[longitudTest:]
+  
+  
       
       
 #####################################################################################################      

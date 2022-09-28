@@ -18,7 +18,7 @@ class Clasificador:
   
   @abstractmethod
   # TODO: esta funcion debe ser implementada en cada clasificador concreto. Devuelve un numpy array con las predicciones
-  # datosTest: matriz numpy con los datos de validación
+  # datosTest: matriz numpy con los datos de validaciï¿½n
   # nominalAtributos: array bool con la indicatriz de los atributos nominales
   # diccionario: array de diccionarios de la estructura Datos utilizados para la codificacion de variables discretas
   def clasifica(self,datosTest,nominalAtributos,diccionario):
@@ -29,7 +29,7 @@ class Clasificador:
   # TODO: implementar
   def error(self,datos,pred):
     # Aqui se compara la prediccion (pred) con las clases reales y se calcula el error    
-	pass
+	  pass
     
     
   # Realiza una clasificacion utilizando una estrategia de particionado determinada
@@ -40,8 +40,8 @@ class Clasificador:
     # - Para validacion cruzada: en el bucle hasta nv entrenamos el clasificador con la particion de train i
     # y obtenemos el error en la particion de test i
     # - Para validacion simple (hold-out): entrenamos el clasificador con la particion de train
-    # y obtenemos el error en la particion test. Otra opción es repetir la validación simple un número especificado de veces, obteniendo en cada una un error. Finalmente se calcularía la media.
-	pass  
+    # y obtenemos el error en la particion test. Otra opciï¿½n es repetir la validaciï¿½n simple un nï¿½mero especificado de veces, obteniendo en cada una un error. Finalmente se calcularï¿½a la media.
+	  pass  
 
 ##############################################################################
 

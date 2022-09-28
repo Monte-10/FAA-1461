@@ -31,8 +31,10 @@ class Datos:
         for h in rows[0]:
             if(h.isnumeric()):
                 self.nominalAtributos.append(False)
-            else:
+            elif isinstance(h, str):
                 self.nominalAtributos.append(True)
+            else:
+                raise ValueError
 
         counter = 0
         primero = []
@@ -79,7 +81,3 @@ class Datos:
     def extraeDatos(self,idx):
         pass
 
-
-if __name__ == "__main__":
-
-    datos = Datos("csv/german.csv")
