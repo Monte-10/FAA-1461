@@ -53,7 +53,7 @@ class ValidacionSimple(EstrategiaParticionado):
   
   def creaParticiones(self,datos,seed=None):
     random.seed(seed)
-    self.particiones = []
+    
     longitudDatos = np.shape(datos)[0]
     longitudTest = int((self.pTest/100)*longitudDatos)
 
@@ -84,7 +84,6 @@ class ValidacionCruzada(EstrategiaParticionado):
   # Esta funcion devuelve una lista de particiones (clase Particion)
   def creaParticiones(self,datos,seed=None):   
     random.seed(seed)
-    self.particiones = []
     longitudDatos = np.shape(datos)[0]
     longitudPorcion = int(longitudDatos/self.numeroParticiones)
 
