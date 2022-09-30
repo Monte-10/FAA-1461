@@ -26,10 +26,16 @@ class Clasificador:
   
   
   # Obtiene el numero de aciertos y errores para calcular la tasa de fallo
-  # TODO: implementar
+  # @args datos: matriz con los datos
+  #       pred: predicción 
   def error(self,datos,pred):
-    # Aqui se compara la prediccion (pred) con las clases reales y se calcula el error    
-	  pass
+    err = 0
+    
+    for i in range(datos.datos.shape[0]):
+      if datos[i][-1] != pred[i]:
+        err += 1
+        
+    return (err/datos.datos.shape[0])*100 
     
     
   # Realiza una clasificacion utilizando una estrategia de particionado determinada

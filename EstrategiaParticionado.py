@@ -9,10 +9,6 @@ class Particion():
     self.indicesTrain=[]
     self.indicesTest=[]
 
-  def __str__(self):
-    return "Indices entrenamiento:" + str(self.indicesTrain) + "\nIndices Test " + str(self.indicesTest)
-    
-
 #####################################################################################################
 
 class EstrategiaParticionado:
@@ -29,12 +25,6 @@ class EstrategiaParticionado:
   # TODO: esta funcion deben ser implementadas en cada estrategia concreta  
   def creaParticiones(self,datos,seed=None):
     pass
-
-  def __str__(self) -> str:
-    cadena = ""
-    for eleme in self.particiones:
-      cadena += str(eleme) + "\n"
-    return cadena
   
 
 #####################################################################################################
@@ -53,7 +43,7 @@ class ValidacionSimple(EstrategiaParticionado):
   
   def creaParticiones(self,datos,seed=None):
     random.seed(seed)
-    
+    self.particiones = []
     longitudDatos = np.shape(datos)[0]
     longitudTest = int((self.pTest/100)*longitudDatos)
 
@@ -64,14 +54,8 @@ class ValidacionSimple(EstrategiaParticionado):
 
       random.shuffle(valores)
 
-      self.particiones.append(Particion())
-
-      random.shuffle(valores)
-
       self.particiones[-1].indicesTest = valores[:longitudTest]
       self.particiones[-1].indicesTrain = valores[longitudTest:]
-  
-  
       
       
 #####################################################################################################      
@@ -84,6 +68,8 @@ class ValidacionCruzada(EstrategiaParticionado):
   # Esta funcion devuelve una lista de particiones (clase Particion)
   def creaParticiones(self,datos,seed=None):   
     random.seed(seed)
+    self.particiones = []
+    
     longitudDatos = np.shape(datos)[0]
     longitudPorcion = int(longitudDatos/self.numeroParticiones)
 
@@ -93,11 +79,11 @@ class ValidacionCruzada(EstrategiaParticionado):
     for i in range(self.numeroParticiones):
       self.particiones.append(Particion())
 
-      #Calculo indices
+      
       fromTest = i*longitudPorcion
       toTest = fromTest + longitudPorcion
 
-      #Asigno indices
+      
       self.particiones[-1].indicesTest = valores[fromTest:toTest]
       self.particiones[-1].indicesTrain = [i for i in valores if i not in self.particiones[-1].indicesTest]
     
