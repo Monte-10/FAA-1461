@@ -1,11 +1,13 @@
 from Datos import Datos
 import EstrategiaParticionado as EstrategiaParticionado
-dataset = Datos('csv/tic-tac-toe.csv')
-estrategiaUno=EstrategiaParticionado.ValidacionCruzada(10)
-estrategiaDos=EstrategiaParticionado.ValidacionSimple(50,10)
+dataset = Datos('ConjuntoDatos/tic-tac-toe.csv')
+print(dataset.datos)
 
-estrategiaUno.creaParticiones(dataset.datos)
-#print(estrategiaUno)
-estrategiaDos.creaParticiones(dataset.datos)
-print(estrategiaDos)
+
+
+
+
+dataset2 = Datos('ConjuntoDatos/german.csv')
+print(dataset2.datos)
+
 
