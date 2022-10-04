@@ -1,5 +1,7 @@
 from abc import ABCMeta,abstractmethod
-
+import numpy as np
+import EstrategiaParticionado
+from scipy.stats import norm
 
 class Clasificador:
   
@@ -35,19 +37,69 @@ class Clasificador:
       if datos[i][-1] != pred[i]:
         err += 1
         
-    return (err/datos.datos.shape[0])*100 
+    return (err/datos.shape[0])
     
     
   # Realiza una clasificacion utilizando una estrategia de particionado determinada
-  # TODO: implementar esta funcion
   def validacion(self,particionado,dataset,clasificador,seed=None):
        
-    # Creamos las particiones siguiendo la estrategia llamando a particionado.creaParticiones
-    # - Para validacion cruzada: en el bucle hasta nv entrenamos el clasificador con la particion de train i
-    # y obtenemos el error en la particion de test i
-    # - Para validacion simple (hold-out): entrenamos el clasificador con la particion de train
-    # y obtenemos el error en la particion test. Otra opci�n es repetir la validaci�n simple un n�mero especificado de veces, obteniendo en cada una un error. Finalmente se calcular�a la media.
-	  pass  
+    '''particionado.creaParticiones(dataset.datos)
+    mErr = 0
+    mErrCLP = 0
+    for particion in particionado.particiones:
+      datosTest = dataset.datos[particion.indicesTest, :]
+      datosTrain = dataset.datos[particion.indicesTrain, :]
+      
+      self.entrenamiento(datosTrain, dataset.nominalAtributos, dataset.diccionario)
+      res, resCLP = clasificador.clasifica(datosTest, dataset.nominalAtributos, dataset.diccionario)
+      mErr += clasificador.error(datosTest, res)
+      mErrCLP += clasificador.error(datosTest, resCLP)
+    lTest = len(particionado.particiones)
+    return mErr/lTest, mErrCLP/lTest'''
+    
+    
+ 
+class ClasificadorNaiveBayes(Clasificador): 
+    dicc_atrib = {}
+    dicc_clas = {}
+    
+    def entrenamiento():
+      """Entrenamiento"""
+      
+    def clasifica(self,datosTest,atributos,dicc):
+      '''post = {}
+      pri = {}
+      lista = []
+      bayes = []
+      
+      n = sum(list(self.dicc_clas.values()))
+      
+      for i, j in self.dicc_clas.items():
+        pri.update({k:(j/n)})
+        
+      for cont in range(len(datosTest)):
+        
+        post.update({cont:{}})
+        for i, j in self.dicc_clas.items():
+          
+          for cont2 in range(datosTest.shape[1] -1):
+            
+            if 'm' in self.dicc_atrib[cont2].keys():
+              m = self.dicc_atrib[cont2]['m'][i]
+              var = self.dicc_atrib[cont2]['v'][i]
+              gauss = dist_normal(m,var,datosTest[cont][cont2])
+              lista.append(gauss)
+            
+            else:
+              c = datosTest[cont][cont2]
+              lista.append(self.dicc_atrib[cont2][c][i] / float(i))
+        
+        bayes.append((crear funcion reduce)reduce(lambda x, y: x*y, lista)*pri[i])
+        post[cont][i] = bayes'''
+      
+      
+    
+  
 
 ##############################################################################
 
