@@ -11,7 +11,7 @@ class Datos:
     # Constructor: procesar el fichero para asignar correctamente las variables nominalAtributos, datos y diccionarios
     def __init__(self, nombreFichero):
         self.nominalAtributos = []
-        self.datos = {}
+        self.datos = {} #{atrN{:[]}}
         self.diccionario = {}
         file = open(nombreFichero)
         csvReader = csv.reader(file)          
@@ -62,7 +62,6 @@ class Datos:
             self.diccionario[h] = self.getDict(h,self.nominalAtributos[counter])
             counter += 1    
         self.datos.replace(self.diccionario,inplace = True) 
-        print(self.datos)
         
     def getDict(self,header,bandera):
         secuencia = 1

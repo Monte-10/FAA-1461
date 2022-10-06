@@ -1,12 +1,18 @@
 from abc import ABCMeta,abstractmethod
+from xmlrpc.client import boolean
 import numpy as np
 import EstrategiaParticionado
 from scipy.stats import norm
+from Datos import Datos
 
 class Clasificador:
   
   # Clase abstracta
   __metaclass__ = ABCMeta
+  
+  def __init__(self) -> None:
+    pass
+    
   
   # Metodos abstractos que se implementan en casa clasificador concreto
   @abstractmethod
@@ -63,9 +69,30 @@ class ClasificadorNaiveBayes(Clasificador):
     dicc_atrib = {}
     dicc_clas = {}
     
-    def entrenamiento():
+    
+    def __init__(self) :
+      #RTM quiza necesite recibir algo en el constructor (por ejemplo el objeto datos)
+      super().__init__()
+
+    def entrenamiento(self,datosTrain : Datos ,nominalAtributos,laplace : boolean):
       """Entrenamiento"""
+      """obtiene probabilidad a priori y a posteriori en funcion del conjunto de datos de train(datos)"""
+      prioris = {}
+      probCondicionadas = {}
+      prioris,conteoClase = self.getPrioris(datosTrain[datosTrain.keys()[-1]], nominalAtributos[-1])#asumimos que la clase es el ultimo atributo siempre
       
+      print("getPriorisOk:")
+      print("Prioris: " + str(prioris))
+      i = 0
+      #while i < len(datosTrain.keys()) -1: #-1 porque la clase no la voy a mandar
+      probCondicionadas["at1"] = self.getProbabilidadesCondicionadas(prioris, datosTrain[datosTrain.keys()[i]], nominalAtributos[i],datosTrain[datosTrain.keys()[-1]],conteoClase) #TODO: falta aniadir al diccionario por cada atributo del excel
+      i += 1
+      
+      
+      #print("\n\n\nCondicionadas: " + str(probCondicionadas))
+
+
+
     def clasifica(self,datosTest,atributos,dicc):
       '''post = {}
       pri = {}
@@ -96,10 +123,89 @@ class ClasificadorNaiveBayes(Clasificador):
         
         bayes.append((crear funcion reduce)reduce(lambda x, y: x*y, lista)*pri[i])
         post[cont][i] = bayes'''
+    
+    def getPrioris(self, datosTrain, nominalAtributo):
+      diccionario = {}
+      print(nominalAtributo)
+      if(nominalAtributo is True): #es nominal
+        for elem in datosTrain:
+          if diccionario.__contains__(elem):
+            diccionario[elem] += 1
+          else:
+            diccionario[elem] = 1
+        total = len(datosTrain)
+        diccionarioSolucion = {}
+        for elem in diccionario.keys():
+          diccionarioSolucion[elem] = diccionario[elem] / total 
+        return diccionarioSolucion,diccionario
       
+      else:
+        #TODO: falta hacer el caso en que no es nominal y el caso en el que le llega laplace
+        pass
+    
+    '''
+    Sera invocada de forma iterativa, por cada columna. 
+    De esta forma, calculara para cada valor que se encuentre la probabilidad condicionada por cada valor en el diccionario de prioris. 
+    Es decir p(A1=1 | C=1), p(A1=2 | C=1), p(A1=1 | C=2) , p(A1=2 | C=2) y todas posibles combinaciones
+    '''
+    def getProbabilidadesCondicionadas(self, prioris, datosTrain, nominalAtributo,clase,conteoClase): 
+      diccionario = {}
+      counter = 0
+      valoresClase = []
+      for valor in clase:
+        if not valoresClase.__contains__(valor):
+          valoresClase.append(valor)
+        
       
+      #diccionarioFinal -> {atr:{1:}}
+      if(nominalAtributo is True):
+        # for elem in datosTrain:
+        #   for valor in valoresClase
+        #   if diccionario.__contains__(elem):
+           
+        #     diccionario[elem] += 1
+        #   else:
+        #     diccionario[elem] = 1
+           
+        diccionarioSolucion = {}
+        i = 0
+               
+        for elemClase in valoresClase:
+          
+          for elem in datosTrain: #diccionario con el conteo de todos los valores de la columna
+            if( clase[i] == elemClase):              
+              print("ENTRO")
+              print(diccionarioSolucion)
+              if diccionarioSolucion.__contains__(elem) and diccionarioSolucion[elem].__contains__(elemClase):
+                print("contiene, sumo 1 a " + str(elem) + "|" + str(elemClase)  )
+                diccionarioSolucion[elem][elemClase] += 1
+              else:
+                diccionarioSolucion[elem] = {elemClase: 1} 
+            
+            i += 1
+          print(diccionarioSolucion)
+          diccionarioFinal = {}
+
+          for elem in diccionarioSolucion.keys():
+            for clase in diccionarioSolucion[elem].keys():
+              diccionarioFinal[elem] = {clase: diccionarioSolucion[elem][clase] / conteoClase[clase] }
+            
+          i = 0
+          #TODO: gestionar de forma correcta los nombres porque esta haciendo la division por una clase que no le corresponde
+          print(conteoClase)
+          print(diccionarioFinal)
+        return diccionarioFinal
+      else:
+        pass
+
+
+
+      pass
+
+ 
     
   
 
 ##############################################################################
+
 
