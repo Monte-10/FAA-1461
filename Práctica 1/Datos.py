@@ -78,5 +78,5 @@ class Datos:
     
     # Devuelve el subconjunto de los datos cuyos �ndices se pasan como argumento
     def extraeDatos(self,idx):
-        pass
+        return np.take(self.datos,idx,axis=0)
 

@@ -1,9 +1,11 @@
 from abc import ABCMeta,abstractmethod
 from xmlrpc.client import boolean
 import numpy as np
+import math
+import operator
 import EstrategiaParticionado
-from scipy.stats import norm
 from Datos import Datos
+from functools import reduce
 
 class Clasificador:
   
@@ -47,21 +49,40 @@ class Clasificador:
     
     
   # Realiza una clasificacion utilizando una estrategia de particionado determinada
-  def validacion(self,particionado,dataset,clasificador,seed=None):
+  def validacion(self,particionado,dataset,clasificador,seed=None, laPlace = False):
        
-    '''particionado.creaParticiones(dataset.datos)
-    mErr = 0
-    mErrCLP = 0
-    for particion in particionado.particiones:
-      datosTest = dataset.datos[particion.indicesTest, :]
-      datosTrain = dataset.datos[particion.indicesTrain, :]
-      
-      self.entrenamiento(datosTrain, dataset.nominalAtributos, dataset.diccionario)
-      res, resCLP = clasificador.clasifica(datosTest, dataset.nominalAtributos, dataset.diccionario)
-      mErr += clasificador.error(datosTest, res)
-      mErrCLP += clasificador.error(datosTest, resCLP)
-    lTest = len(particionado.particiones)
-    return mErr/lTest, mErrCLP/lTest'''
+    particionado.creaParticiones(dataset.datos,None)
+    error = []
+    data_d = dataset.diccionario
+    data_a_d = dataset.nominalAtributos
+
+    if (particionado.nombreEstrategia == "ValidacionSimple"):
+      clasificador.entrenamiento(datostrain=dataset.extraeDatos(particionado.listaParticiones[0].indicesTrain)
+      atributosDiscretos = data_a_d,
+      diccionario = data_d,
+      laPlace = laPlace)
+      prediccion = clasificador.clasifica(datostest=dataset.extraeDatos(particionado.listaParticiones[0].indicesTest),
+                               atributosDiscretos=data_a_d,
+                               diccionario=data_d)
+
+      error.append(clasificador.error(datos=dataset.extraeDatos(particionado.listaParticiones[0].indicesTest),
+                                    pred=prediccion))
+
+    elif (particionado.nombreEstrategia == "ValidacionCruzada"):
+        for i in range(particionado.numeroParticiones):
+            clasificador.entrenamiento(datostrain=dataset.extraeDatos(particionado.listaParticiones[i].indicesTrain),
+                                   atributosDiscretos=data_a_d,
+                                   diccionario=data_d,
+                                   laPlace = laPlace)
+            prediccion = clasificador.clasifica(datostest=dataset.extraeDatos(particionado.listaParticiones[i].indicesTest),
+                                   atributosDiscretos=data_a_d,
+                                   diccionario=data_d)
+            error.append(clasificador.error(datos=dataset.extraeDatos(particionado.listaParticiones[i].indicesTest),
+                                        pred=prediccion))
+    
+    
+    return error, prediccion                             
+                                 
     
     
  
@@ -94,7 +115,7 @@ class ClasificadorNaiveBayes(Clasificador):
 
 
     def clasifica(self,datosTest,atributos,dicc):
-      '''post = {}
+      post = {}
       pri = {}
       lista = []
       bayes = []
@@ -102,7 +123,7 @@ class ClasificadorNaiveBayes(Clasificador):
       n = sum(list(self.dicc_clas.values()))
       
       for i, j in self.dicc_clas.items():
-        pri.update({k:(j/n)})
+        pri.update({i:(j/n)})
         
       for cont in range(len(datosTest)):
         
@@ -121,8 +142,13 @@ class ClasificadorNaiveBayes(Clasificador):
               c = datosTest[cont][cont2]
               lista.append(self.dicc_atrib[cont2][c][i] / float(i))
         
-        bayes.append((crear funcion reduce)reduce(lambda x, y: x*y, lista)*pri[i])
-        post[cont][i] = bayes'''
+        bayes.append(reduce(lambda x, y: x*y, lista)*pri[i])
+        post[cont][i] = bayes
+      pred = np.zeros(datosTest.shape[0])
+      for i in range(datosTest.shape[0]):
+        pred[i] = max(post[i].items(), key = operator.itemgetter(1))[0]
+
+      return pred
     
     def getPrioris(self, datosTrain, nominalAtributo):
       diccionario = {}
@@ -201,6 +227,15 @@ class ClasificadorNaiveBayes(Clasificador):
 
 
       pass
+
+def dist_normal(m,v,n):
+      if (v == 0):
+        v += math.pow(10, -6)
+
+      exp = -(math.pow((n-m), 2)/(2*v))
+      base = 1/math.sqrt(2*math.pi*v)
+      densidad = base*math.pow(math.e,exp)
+      return densidad
 
  
     
