@@ -161,11 +161,11 @@ class ClasificadorNaiveBayes(Clasificador):
             diccionario[elem] = 1
       
         '''Correcion de laplace'''
-        #TODO: confirmar que se hace tanto en los prioris como en los demas
-        '''if(laplace is True):
+        #TODO: confirmar que se hace tambien en los prioris
+        if(laplace is True):
           for e in diccionario.keys():
             diccionario[e] += 1
-        '''
+        '''--------------------'''
       
         total = len(datosTrain)
         diccionarioSolucion = {}
@@ -214,7 +214,7 @@ class ClasificadorNaiveBayes(Clasificador):
         
 
         '''CORRECION DE LAPACE'''
-        if(laplace is True):
+        if(laplace is True):  
           print("Correccion de laplace")
           for elem in diccionarioSolucion.keys():
             for clase in diccionarioSolucion[elem].keys():
