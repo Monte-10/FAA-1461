@@ -95,23 +95,22 @@ class ClasificadorNaiveBayes(Clasificador):
       #RTM quiza necesite recibir algo en el constructor (por ejemplo el objeto datos)
       super().__init__()
 
-    def entrenamiento(self,datosTrain : Datos ,nominalAtributos,laplace : boolean):
+    def entrenamiento(self,datosTrain : Datos ,nominalAtributos, laplace : boolean):
       """Entrenamiento"""
       """obtiene probabilidad a priori y a posteriori en funcion del conjunto de datos de train(datos)"""
       prioris = {}
-      probCondicionadas = {}
-      prioris,conteoClase = self.getPrioris(datosTrain[datosTrain.keys()[-1]], nominalAtributos[-1])#asumimos que la clase es el ultimo atributo siempre
+      probCondicionadas = {} #diccionario que contiene {columna:{valor1:{clase1:Nveces,clase2:Nveces},valor2:{clase1:Nveces}}}
+      prioris,conteoClase = self.getPrioris(datosTrain[datosTrain.keys()[-1]], nominalAtributos[-1],laplace)#asumimos que la clase es el ultimo atributo siempre
       
       print("getPriorisOk:")
       print("Prioris: " + str(prioris))
       i = 0
-      #while i < len(datosTrain.keys()) -1: #-1 porque la clase no la voy a mandar
-      # probCondicionadas["at1"] = 
-      self.getProbabilidadesCondicionadas(prioris, datosTrain[datosTrain.keys()[i]], nominalAtributos[i],datosTrain[datosTrain.keys()[-1]],conteoClase) #TODO: falta aniadir al diccionario por cada atributo del excel
-      i += 1
+      while i < len(datosTrain.keys()) -1: #-1 porque la clase no la voy a mandar
+        probCondicionadas[i] = self.getProbabilidadesCondicionadas(prioris, datosTrain[datosTrain.keys()[i]], nominalAtributos[i],datosTrain[datosTrain.keys()[-1]],conteoClase,laplace) 
+        i += 1
       
       
-      #print("\n\n\nCondicionadas: " + str(probCondicionadas))
+      print("\n\n\nCondicionadas: " + str(probCondicionadas))
 
 
 
@@ -151,23 +150,32 @@ class ClasificadorNaiveBayes(Clasificador):
 
       return pred
     
-    def getPrioris(self, datosTrain, nominalAtributo):
+    def getPrioris(self, datosTrain, nominalAtributo, laplace):
       diccionario = {}
-      print(nominalAtributo)
+      
       if(nominalAtributo is True): #es nominal
         for elem in datosTrain:
           if diccionario.__contains__(elem):
             diccionario[elem] += 1
           else:
             diccionario[elem] = 1
+      
+        '''Correcion de laplace'''
+        #TODO: confirmar que se hace tanto en los prioris como en los demas
+        '''if(laplace is True):
+          for e in diccionario.keys():
+            diccionario[e] += 1
+        '''
+      
         total = len(datosTrain)
         diccionarioSolucion = {}
         for elem in diccionario.keys():
           diccionarioSolucion[elem] = diccionario[elem] / total 
+      
         return diccionarioSolucion,diccionario
       
       else:
-        #TODO: falta hacer el caso en que no es nominal y el caso en el que le llega laplace
+        #TODO: falta hacer el caso en que no es nominal
         pass
     
     '''
@@ -178,7 +186,7 @@ class ClasificadorNaiveBayes(Clasificador):
     clase -> lista con todas las filas de la columna clase.
     conteoClase -> numeroApariciones para cada valor de la clase
     '''
-    def getProbabilidadesCondicionadas(self, prioris, datosTrain, nominalAtributo,clase,conteoClase): 
+    def getProbabilidadesCondicionadas(self, prioris, datosTrain, nominalAtributo,clase,conteoClase,laplace): 
       diccionario = {}
       counter = 0
       valoresClase = []
@@ -188,13 +196,10 @@ class ClasificadorNaiveBayes(Clasificador):
         if not valoresClase.__contains__(valor):
           valoresClase.append(valor)
         
-      
       #diccionarioFinal -> {atr = 0:{1:}, atr = 1{1:,2:,3:}}
       if(nominalAtributo is True):
         diccionarioSolucion = {}
         i = 0
-               
-        
         for elem in datosTrain: #diccionario con el conteo de todos los valores de la columna          
           if diccionarioSolucion.__contains__(elem) and diccionarioSolucion[elem].__contains__(miLista[i]):            
             diccionarioSolucion[elem][miLista[i]] += 1
@@ -206,17 +211,27 @@ class ClasificadorNaiveBayes(Clasificador):
               diccionarioSolucion[elem][miLista[i]] = 1 
         
           i += 1
+        
+
+        '''CORRECION DE LAPACE'''
+        if(laplace is True):
+          print("Correccion de laplace")
+          for elem in diccionarioSolucion.keys():
+            for clase in diccionarioSolucion[elem].keys():
+              diccionarioSolucion[elem][clase] += 1
+          
+          for elem in conteoClase.keys():
+            conteoClase[elem] += 1
+          
+        '''----------------------'''
         diccionarioFinal = {}
 
         for elem in diccionarioSolucion.keys():
           diccionarioFinal[elem] = {}
           for clase in diccionarioSolucion[elem].keys():
-            
             diccionarioFinal[elem][clase] = diccionarioSolucion[elem][clase] / conteoClase[clase] 
           
         i = 0
-        
-        print(diccionarioFinal)
         return diccionarioFinal
       else:
         pass

@@ -5,7 +5,8 @@ dataset = Datos('ConjuntoDatos/tic-tac-toe.csv')
 #print(dataset.datos["Class"][0]) #selecciona, de la columna Class, el valor que está en la fila 0
 #print(dataset.datos.keys())
 clasificador = ClasificadorNaiveBayes()
-clasificador.entrenamiento(dataset.datos, dataset.nominalAtributos, None)
+clasificador.entrenamiento(dataset.datos, dataset.nominalAtributos, laplace=True)
+clasificador.entrenamiento(dataset.datos, dataset.nominalAtributos, laplace=False)
 """
 estrategiaUno=EstrategiaParticionado.ValidacionCruzada(10)
 estrategiaDos=EstrategiaParticionado.ValidacionSimple(50,10)
