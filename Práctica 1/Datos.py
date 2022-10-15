@@ -10,7 +10,7 @@ class Datos:
 
     # Constructor: procesar el fichero para asignar correctamente las variables nominalAtributos, datos y diccionarios
     def __init__(self, nombreFichero):
-        self.nominalAtributos = []
+        self.nominalAtributos = [] #true si es discreto, false si numerico
         self.datos = {} #{atrN{:[]}}
         self.diccionario = {}
         file = open(nombreFichero)
@@ -45,7 +45,6 @@ class Datos:
 
             for fila in rows:
                 primero[counter].append(fila[counter])
-                ##TODO: la insercion de los datos no es directa, sino que es el valor ordenador alfabeticamente
             counter += 1        
         
         counter = 0

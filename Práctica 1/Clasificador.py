@@ -105,10 +105,10 @@ class ClasificadorNaiveBayes(Clasificador):
       print("getPriorisOk:")
       print("Prioris: " + str(prioris))
       i = 0
-      while i < len(datosTrain.keys()) -1: #-1 porque la clase no la voy a mandar
-        probCondicionadas[i] = self.getProbabilidadesCondicionadas(prioris, datosTrain[datosTrain.keys()[i]], nominalAtributos[i],datosTrain[datosTrain.keys()[-1]],conteoClase,laplace) 
-        i += 1
-      
+      # while i < len(datosTrain.keys()) -1: #-1 porque la clase no la voy a mandar
+      #   probCondicionadas[i] = self.getProbabilidadesCondicionadas(prioris, datosTrain[datosTrain.keys()[i]], nominalAtributos[i],datosTrain[datosTrain.keys()[-1]],conteoClase,laplace) 
+      #   i += 1
+      probCondicionadas[i] = self.getProbabilidadesCondicionadas(prioris, datosTrain[datosTrain.keys()[1]], nominalAtributos[1],datosTrain[datosTrain.keys()[-1]],conteoClase,laplace) 
       
       print("\n\n\nCondicionadas: " + str(probCondicionadas))
 
@@ -153,31 +153,29 @@ class ClasificadorNaiveBayes(Clasificador):
     def getPrioris(self, datosTrain, nominalAtributo, laplace):
       diccionario = {}
       
-      if(nominalAtributo is True): #es nominal
-        for elem in datosTrain:
-          if diccionario.__contains__(elem):
-            diccionario[elem] += 1
-          else:
-            diccionario[elem] = 1
-      
-        '''Correcion de laplace'''
-        #TODO: confirmar que se hace tambien en los prioris
-        if(laplace is True):
-          for e in diccionario.keys():
-            diccionario[e] += 1
-        '''--------------------'''
-      
-        total = len(datosTrain)
-        diccionarioSolucion = {}
-        for elem in diccionario.keys():
-          diccionarioSolucion[elem] = diccionario[elem] / total 
-      
-        return diccionarioSolucion,diccionario
-      
-      else:
-        #TODO: falta hacer el caso en que no es nominal
-        pass
+      #if(nominalAtributo is True): #es nominal
+      #creo que los prioris es indiferente si el atributo es nominal o no
+      for elem in datosTrain:
+        if diccionario.__contains__(elem):
+          diccionario[elem] += 1
+        else:
+          diccionario[elem] = 1
     
+      '''Correcion de laplace'''
+      #TODO: confirmar que se hace tambien en los prioris
+      if(laplace is True):
+        for e in diccionario.keys():
+          diccionario[e] += 1
+      '''--------------------'''
+    
+      total = len(datosTrain)
+      diccionarioSolucion = {}
+      for elem in diccionario.keys():
+        diccionarioSolucion[elem] = diccionario[elem] / total 
+    
+      return diccionarioSolucion,diccionario
+    
+      
     '''
     Sera invocada de forma iterativa, por cada columna. 
     De esta forma, calculara para cada valor que se encuentre la probabilidad condicionada por cada valor en el diccionario de prioris. 
@@ -196,7 +194,7 @@ class ClasificadorNaiveBayes(Clasificador):
         if not valoresClase.__contains__(valor):
           valoresClase.append(valor)
         
-      #diccionarioFinal -> {atr = 0:{1:}, atr = 1{1:,2:,3:}}
+      #diccionarioFinal -> {atr = 0:{clase = 1:}, atr = 1{clase = 1:,clase = 2:,clase = 3:}}
       if(nominalAtributo is True):
         diccionarioSolucion = {}
         i = 0
@@ -219,10 +217,8 @@ class ClasificadorNaiveBayes(Clasificador):
           for elem in diccionarioSolucion.keys():
             for clase in diccionarioSolucion[elem].keys():
               diccionarioSolucion[elem][clase] += 1
-          
           for elem in conteoClase.keys():
             conteoClase[elem] += 1
-          
         '''----------------------'''
         diccionarioFinal = {}
 
@@ -234,7 +230,36 @@ class ClasificadorNaiveBayes(Clasificador):
         i = 0
         return diccionarioFinal
       else:
-        pass
+        counter = 0
+        miDict = {}
+        for e in clase:
+          miDict[e] = []
+          miDict[e].append(int(datosTrain[counter]))
+          counter += 1
+        print(miDict)
+        '''{clase=N : [1,4,2,...,N]}'''
+        diccionarioSolucion = {}
+        for elem in miDict.keys():
+          lista = miDict[elem]
+          '''media'''
+          mean = sum(lista) / len(lista)
+          var = sum((l-mean)**2 for l in lista) / len(lista)
+          '''desviacion estandar'''
+          st_dev = math.sqrt(var)
+          
+          diccionarioSolucion[elem] = (mean,st_dev)
+        print(diccionarioSolucion)
+        return diccionarioSolucion
+        '''{clase = 1: (media,desviacion tipica),clase = 2: (media,desviacion tipica)}'''
+        '''calcular media y desviacion tipica para cada valor de la clase '''
+        print(type(datosTrain))
+        print(datosTrain)
+        media = datosTrain.mean()
+        #varianza = datosTrain.std(ddof=0)
+        varianza = 0
+        print(media)
+        return (media,varianza)
+
 
 
 
