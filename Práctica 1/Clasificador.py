@@ -6,6 +6,7 @@ import operator
 import EstrategiaParticionado
 from Datos import Datos
 from functools import reduce
+from scipy.stats import norm
 
 class Clasificador:
   
@@ -49,40 +50,21 @@ class Clasificador:
     
     
   # Realiza una clasificacion utilizando una estrategia de particionado determinada
-  """def validacion(self,particionado,dataset,clasificador,seed=None, laPlace = False):
+  def validacion(self,particionado,dataset,clasificador,seed=None, laPlace = False):
        
-    particionado.creaParticiones(dataset.datos,None)
-    error = []
-    data_d = dataset.diccionario
-    data_a_d = dataset.nominalAtributos
+    particionado.creaParticiones(dataset, seed)
+    errores = []
 
-    if (particionado.nombreEstrategia == "ValidacionSimple"):
-      clasificador.entrenamiento(datostrain=dataset.extraeDatos(particionado.listaParticiones[0].indicesTrain)
-      atributosDiscretos = data_a_d,
-      diccionario = data_d,
-      laPlace = laPlace)
-      prediccion = clasificador.clasifica(datostest=dataset.extraeDatos(particionado.listaParticiones[0].indicesTest),
-                               atributosDiscretos=data_a_d,
-                               diccionario=data_d)
+    for i in particionado.particiones:
+      datosTrain = dataset.extraeDatos(i.indicesTrain)
+      datosTest = dataset.extraeDatos(i.indicesTest)
 
-      error.append(clasificador.error(datos=dataset.extraeDatos(particionado.listaParticiones[0].indicesTest),
-                                    pred=prediccion))
+      clasificador.entrenamiento(datosTrain, dataset.nominalAtributos, dataset.diccionario)
+      predicciones = clasificador.clasifica(datosTest, dataset.nominalAtributos, dataset.diccionario)
+      
+      errores.append(self.error(datosTest, predicciones))
 
-    elif (particionado.nombreEstrategia == "ValidacionCruzada"):
-        for i in range(particionado.numeroParticiones):
-            clasificador.entrenamiento(datostrain=dataset.extraeDatos(particionado.listaParticiones[i].indicesTrain),
-                                   atributosDiscretos=data_a_d,
-                                   diccionario=data_d,
-                                   laPlace = laPlace)
-            prediccion = clasificador.clasifica(datostest=dataset.extraeDatos(particionado.listaParticiones[i].indicesTest),
-                                   atributosDiscretos=data_a_d,
-                                   diccionario=data_d)
-            error.append(clasificador.error(datos=dataset.extraeDatos(particionado.listaParticiones[i].indicesTest),
-                                        pred=prediccion))
-    
-    
-    return error, prediccion                             
-  """                               
+    return errores                                                    
     
     
  
@@ -115,39 +97,36 @@ class ClasificadorNaiveBayes(Clasificador):
 
 
     def clasifica(self,datosTest,atributos,dicc):
-      post = {}
-      pri = {}
-      lista = []
-      bayes = []
-      
-      n = sum(list(self.dicc_clas.values()))
-      
-      for i, j in self.dicc_clas.items():
-        pri.update({i:(j/n)})
-        
-      for cont in range(len(datosTest)):
-        
-        post.update({cont:{}})
-        for i, j in self.dicc_clas.items():
-          
-          for cont2 in range(datosTest.shape[1] -1):
-            
-            if 'm' in self.dicc_atrib[cont2].keys():
-              m = self.dicc_atrib[cont2]['m'][i]
-              var = self.dicc_atrib[cont2]['v'][i]
-              gauss = dist_normal(m,var,datosTest[cont][cont2])
-              lista.append(gauss)
-            
-            else:
-              c = datosTest[cont][cont2]
-              lista.append(self.dicc_atrib[cont2][c][i] / float(i))
-        
-        bayes.append(reduce(lambda x, y: x*y, lista)*pri[i])
-        post[cont][i] = bayes
-      pred = np.zeros(datosTest.shape[0])
-      for i in range(datosTest.shape[0]):
-        pred[i] = max(post[i].items(), key = operator.itemgetter(1))[0]
+      pred = []
 
+      for fila in datosTest:
+        # Calculamos PRODj [(P(Xj|Hi)*P(Hi))] para cada clase
+        prodHi = {}
+
+        contClases = 0
+        for i in self.tablaAPriori: 
+          pHi = self.tablaAPriori[i] # P(Hi)
+
+          j = 0
+          prod = pHi
+          while j < len(fila) - 1:
+            if atributos[j]:
+              #print(self.tablasAtributos[j])  
+              ejsClase = sum(self.tablasAtributos[j][:, contClases])
+              prod *= self.tablasAtributos[j][int(fila[j])][contClases] / ejsClase # P(X1|Hi) * P(X2|Hi) * ...
+
+            else:
+              op1 = (1/(math.sqrt(2*math.pi*self.tablasAtributos[j][1][contClases])))
+              op2 =math.exp((-(fila[j]-self.tablasAtributos[j][0][contClases]))/(2*self.tablasAtributos[j][1][contClases]))
+              prod *= op1*op2
+
+            j += 1
+          
+          prodHi[i] = prod
+          contClases += 1
+        
+        pred.append(max(prodHi, key=prodHi.get)) # Decision = argmax_Hi PRODj [(P(Xj|Hi)*P(Hi))]
+      
       return pred
     
     def getPrioris(self, datosTrain, nominalAtributo, laplace):

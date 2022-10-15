@@ -49,7 +49,7 @@ class ValidacionSimple(EstrategiaParticionado):
 
     valores = [i for i in range(longitudDatos)]
 
-    for i in range(self.nEjec):
+    for _ in range(self.nEjec):
       self.particiones.append(Particion())
 
       random.shuffle(valores)
