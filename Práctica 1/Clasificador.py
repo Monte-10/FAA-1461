@@ -1,5 +1,7 @@
 from abc import ABCMeta,abstractmethod
 from xmlrpc.client import boolean
+
+from zmq import THREAD_AFFINITY_CPU_REMOVE
 import numpy as np
 import math
 import operator
@@ -77,21 +79,56 @@ class ClasificadorNaiveBayes(Clasificador):
       #RTM quiza necesite recibir algo en el constructor (por ejemplo el objeto datos)
       super().__init__()
 
-    def entrenamiento(self,datosTrain : Datos ,nominalAtributos, laplace : boolean):
+    def entrenamiento(self,datosTrain ,nominalAtributos, laplace : boolean, datos):
       """Entrenamiento"""
       """obtiene probabilidad a priori y a posteriori en funcion del conjunto de datos de train(datos)"""
+      
       prioris = {}
       probCondicionadas = {} #diccionario que contiene {columna:{valor1:{clase1:Nveces,clase2:Nveces},valor2:{clase1:Nveces}}}
+      print("#Calculamos los prioris#")
       prioris,conteoClase = self.getPrioris(datosTrain[datosTrain.keys()[-1]], nominalAtributos[-1],laplace)#asumimos que la clase es el ultimo atributo siempre
-      
-      print("getPriorisOk:")
+
       print("Prioris: " + str(prioris))
-      i = 0
-      # while i < len(datosTrain.keys()) -1: #-1 porque la clase no la voy a mandar
-      #   probCondicionadas[i] = self.getProbabilidadesCondicionadas(prioris, datosTrain[datosTrain.keys()[i]], nominalAtributos[i],datosTrain[datosTrain.keys()[-1]],conteoClase,laplace) 
-      #   i += 1
-      probCondicionadas[i] = self.getProbabilidadesCondicionadas(prioris, datosTrain[datosTrain.keys()[1]], nominalAtributos[1],datosTrain[datosTrain.keys()[-1]],conteoClase,laplace) 
+
       
+      clases = np.unique(datosTrain[datosTrain.keys()[-1]])
+      tablaSolucion = [] #contiene todas una lista por cada atributo con el nnumero de aparicioines de la clase por cada valor del atributo
+      counter = 0
+      print(len(datos))
+      for key,values in datos.items():
+        #para no coger la clase
+        if counter == len(datos) -1:
+          break
+        if nominalAtributos[counter]:
+
+          tabla = np.zeros((len(values),len(clases)))
+          for index,row in datosTrain.iterrows():
+            tabla[int(row[counter])-1,int(row[-1])-1] += 1
+
+          if laplace is True:
+            tabla += 1
+          
+        else:
+          tabla = np.zeros((2,len(clases)))  #[mediaClase1][varianzaClase1]
+                                             #[mediaClase2][varianzaClase2]
+          
+          auxCont = 0
+          for clase in clases:
+            lista = []
+            for index,row in datosTrain.iterrows():
+              if(row[-1] == clase):
+                lista.append(int(row[counter]))
+            
+            media = np.mean(lista)
+            varianza = np.var(lista)
+            tabla[0][auxCont] = media
+            tabla[1][auxCont] = varianza
+            auxCont += 1
+          
+        counter += 1
+        tablaSolucion.append(tabla)
+      print(tablaSolucion)
+
       print("\n\n\nCondicionadas: " + str(probCondicionadas))
 
 
@@ -132,21 +169,12 @@ class ClasificadorNaiveBayes(Clasificador):
     def getPrioris(self, datosTrain, nominalAtributo, laplace):
       diccionario = {}
       
-      #if(nominalAtributo is True): #es nominal
-      #creo que los prioris es indiferente si el atributo es nominal o no
       for elem in datosTrain:
         if diccionario.__contains__(elem):
           diccionario[elem] += 1
         else:
           diccionario[elem] = 1
-    
-      '''Correcion de laplace'''
-      #TODO: confirmar que se hace tambien en los prioris
-      if(laplace is True):
-        for e in diccionario.keys():
-          diccionario[e] += 1
-      '''--------------------'''
-    
+
       total = len(datosTrain)
       diccionarioSolucion = {}
       for elem in diccionario.keys():
@@ -164,8 +192,7 @@ class ClasificadorNaiveBayes(Clasificador):
     conteoClase -> numeroApariciones para cada valor de la clase
     '''
     def getProbabilidadesCondicionadas(self, prioris, datosTrain, nominalAtributo,clase,conteoClase,laplace): 
-      diccionario = {}
-      counter = 0
+
       valoresClase = []
       miLista = []
       for valor in clase:
@@ -209,13 +236,16 @@ class ClasificadorNaiveBayes(Clasificador):
         i = 0
         return diccionarioFinal
       else:
-        counter = 0
         miDict = {}
+               
         for e in clase:
-          miDict[e] = []
-          miDict[e].append(int(datosTrain[counter]))
-          counter += 1
-        print(miDict)
+          print(e.index[0])
+          if miDict.__contains__(e):            
+            miDict[e].append(int(datosTrain[clase.index[0]]))
+          else:
+            miDict[e] = []
+            miDict[e].append(int(datosTrain[clase.index[0]]))
+
         '''{clase=N : [1,4,2,...,N]}'''
         diccionarioSolucion = {}
         for elem in miDict.keys():
@@ -224,15 +254,12 @@ class ClasificadorNaiveBayes(Clasificador):
           mean = sum(lista) / len(lista)
           var = sum((l-mean)**2 for l in lista) / len(lista)
           '''desviacion estandar'''
-          st_dev = math.sqrt(var)
-          
+          st_dev = math.sqrt(var)          
           diccionarioSolucion[elem] = (mean,st_dev)
-        print(diccionarioSolucion)
         return diccionarioSolucion
         '''{clase = 1: (media,desviacion tipica),clase = 2: (media,desviacion tipica)}'''
         '''calcular media y desviacion tipica para cada valor de la clase '''
-        print(type(datosTrain))
-        print(datosTrain)
+       
         media = datosTrain.mean()
         #varianza = datosTrain.std(ddof=0)
         varianza = 0
