@@ -11,17 +11,40 @@ dataset = Datos('ConjuntoDatos/german.csv')
 #print(dataset.datos.keys())
 clasificador = ClasificadorNaiveBayes()
 
-validacionSimple = EstrategiaParticionado.ValidacionSimple(30,1)
-validacionSimple.creaParticiones(dataset.datos)
-total = []
-print(dataset.diccionario)
-clasificador.entrenamiento(dataset.extraeDatos(validacionSimple.particiones[0].indicesTrain) , dataset.nominalAtributos, False,dataset.diccionario)
+validacionSimple = EstrategiaParticionado.ValidacionSimple(10,3)
+validacionCruzada = EstrategiaParticionado.ValidacionCruzada(4)
+# validacionSimple.creaParticiones(dataset.datos)
+# total = []
+# print(dataset.diccionario)
+#clasificador.entrenamiento(dataset.extraeDatos(validacionSimple.particiones[0].indicesTrain) , dataset.nominalAtributos, False,dataset.diccionario)
 #clasificador.entrenamiento(dataset.extraeDatos(validacionSimple), dataset.nominalAtributos, laplace=False)
-"""
-estrategiaUno=EstrategiaParticionado.ValidacionCruzada(10)
-estrategiaDos=EstrategiaParticionado.ValidacionSimple(50,10)
-estrategiaUno.creaParticiones(dataset.datos)
-#print(estrategiaUno)
-estrategiaDos.creaParticiones(dataset.datos)
-print(estrategiaDos)
-"""
+
+
+
+error = []
+for i in range(10):
+    error += clasificador.validacion(validacionCruzada, dataset, clasificador)
+print(error)
+print(statistics.mean(error))
+print(np.std(error))
+
+# error = []
+# for i in range(20):
+#     error += clasificador.validacion(validacionSimple, dataset, clasificador)
+# print(statistics.mean(error))
+# print(statistics.stdev(error))
+
+
+# error = []
+# for i in range(20):
+#     error += clasificador.validacion(validacionCruzada, dataset, clasificador, laPlace = True)
+# print(statistics.mean(error))
+# print(statistics.stdev(error))
+
+# error = []
+# for i in range(20):
+#     error += clasificador.validacion(validacionSimple, dataset, clasificador, laPlace = True)
+# print(statistics.mean(error))
+# print(statistics.stdev(error))
+
+#clasificador.validacion(validacionSimple, dataset, clasificador, laPlace = True)

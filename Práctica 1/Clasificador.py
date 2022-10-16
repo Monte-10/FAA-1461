@@ -9,6 +9,7 @@ import EstrategiaParticionado
 from Datos import Datos
 from functools import reduce
 from scipy.stats import norm
+import statistics
 
 class Clasificador:
   
@@ -43,29 +44,34 @@ class Clasificador:
   #       pred: predicción 
   def error(self,datos,pred):
     err = 0
-    
-    for i in range(datos.datos.shape[0]):
-      if datos[i][-1] != pred[i]:
+    for i in range(datos.shape[0] - 1 ): #numero de elementos de cada atributo
+      if datos[datos.keys()[-1]].values[i] != pred[i]:
         err += 1
-        
+    
+      # if datos['Class'][i] != pred[i]:
+      #   err += 1
+    #print("Total error:" + str(err) + "total datos: " + str(datos.shape[0]))
     return (err/datos.shape[0])
     
-    
-  # Realiza una clasificacion utilizando una estrategia de particionado determinada
+# Creamos las particiones siguiendo la estrategia llamando a particionado.creaParticiones
+    # - Para validacion cruzada: en el bucle hasta nv entrenamos el clasificador con la particion de train i
+    # y obtenemos el error en la particion de test i
+    # - Para validacion simple (hold-out): entrenamos el clasificador con la particion de train
+    # y obtenemos el error en la particion test. Otra opci�n es repetir la validaci�n simple un n�mero especificado de veces, obteniendo en cada una un error. Finalmente se calcular�a la media.    
+  
   def validacion(self,particionado,dataset,clasificador,seed=None, laPlace = False):
        
-    particionado.creaParticiones(dataset, seed)
+    particionado.creaParticiones(dataset.datos, seed)
     errores = []
 
     for i in particionado.particiones:
       datosTrain = dataset.extraeDatos(i.indicesTrain)
       datosTest = dataset.extraeDatos(i.indicesTest)
 
-      clasificador.entrenamiento(datosTrain, dataset.nominalAtributos, dataset.diccionario)
+      clasificador.entrenamiento(datosTrain, dataset.nominalAtributos,laPlace, dataset.diccionario)
       predicciones = clasificador.clasifica(datosTest, dataset.nominalAtributos, dataset.diccionario)
-      
       errores.append(self.error(datosTest, predicciones))
-
+    #print(statistics.mean(errores))
     return errores                                                    
     
     
@@ -76,30 +82,28 @@ class ClasificadorNaiveBayes(Clasificador):
     
     
     def __init__(self) :
-      #RTM quiza necesite recibir algo en el constructor (por ejemplo el objeto datos)
       super().__init__()
 
     def entrenamiento(self,datosTrain ,nominalAtributos, laplace : boolean, datos):
       """Entrenamiento"""
       """obtiene probabilidad a priori y a posteriori en funcion del conjunto de datos de train(datos)"""
       
-      prioris = {}
-      probCondicionadas = {} #diccionario que contiene {columna:{valor1:{clase1:Nveces,clase2:Nveces},valor2:{clase1:Nveces}}}
-      print("#Calculamos los prioris#")
-      prioris,conteoClase = self.getPrioris(datosTrain[datosTrain.keys()[-1]], nominalAtributos[-1],laplace)#asumimos que la clase es el ultimo atributo siempre
+      self.prioris = {}
+      #probCondicionadas = {} #diccionario que contiene {columna:{valor1:{clase1:Nveces,clase2:Nveces},valor2:{clase1:Nveces}}}
+      ##print("#Calculamos los prioris#")
+      self.prioris,conteoClase = self.getPrioris(datosTrain[datosTrain.keys()[-1]], nominalAtributos[-1],laplace)#asumimos que la clase es el ultimo atributo siempre
 
-      print("Prioris: " + str(prioris))
+      ##print("Prioris: " + str(self.prioris))
       
       clases = np.unique(datosTrain[datosTrain.keys()[-1]])
-      tablaSolucion = [] #contiene todas una lista por cada atributo con el nnumero de aparicioines de la clase por cada valor del atributo
+      self.tablaSolucion = [] #contiene todas una lista por cada atributo con el nnumero de aparicioines de la clase por cada valor del atributo
       counter = 0
-      print(len(datos))
       for key,values in datos.items():
         #para no coger la clase
         if counter == len(datos) -1:
           break
         if nominalAtributos[counter]:
-
+          #print("Creo tabla")
           tabla = np.zeros((len(values),len(clases)))
           for index,row in datosTrain.iterrows():
             tabla[int(row[counter])-1,int(row[-1])-1] += 1
@@ -108,6 +112,7 @@ class ClasificadorNaiveBayes(Clasificador):
             tabla += 1
           
         else:
+          #print("Creo  tabla por no nominal")
           tabla = np.zeros((2,len(clases)))  #[mediaClase1][varianzaClase1]
                                              #[mediaClase2][varianzaClase2]
           
@@ -125,38 +130,43 @@ class ClasificadorNaiveBayes(Clasificador):
             auxCont += 1
           
         counter += 1
-        tablaSolucion.append(tabla)
-      print(tablaSolucion)
-
-      print("\n\n\nCondicionadas: " + str(probCondicionadas))
-
-
-
-    def clasifica(self,datosTest,atributos,dicc):
+        self.tablaSolucion.append(tabla)
+    def clasifica(self,datosTest,nominalAtributos,dicc):
+      
       pred = []
-      for fila in datosTest:
+      
+      ##print(datosTest)
+      for index,fila in datosTest.iterrows():
         # Calculamos PRODj [(P(Xj|Hi)*P(Hi))] para cada clase
+        ##print(fila)
         prodHi = {}
 
         contClases = 0
-        for i in self.tablaAPriori: 
-          pHi = self.tablaAPriori[i] # P(Hi)
-
+        for i in self.prioris: 
+          pHi = self.prioris[i] # P(Hi)
+          ##print("pHi ->" + str(pHi))
           j = 0
           prod = pHi
-          while j < len(fila) - 1:
-            if atributos[j]:
-              #print(self.tablasAtributos[j])  
-              ejsClase = sum(self.tablasAtributos[j][:, contClases])
-              prod *= self.tablasAtributos[j][int(fila[j])][contClases] / ejsClase # P(X1|Hi) * P(X2|Hi) * ...
+          ##print(len(datosTest.keys()))
+          while j < len(datosTest.keys()) - 1:
+            ##print("J -> " + str(j))
+            if nominalAtributos[j]:
+              ##print(self.tablaSolucion[j])  
+              ##print(self.tablaSolucion[j][:, contClases])
+              ejsClase = sum(self.tablaSolucion[j][:, contClases])
+              ##print(ejsClase)
+              ##print("Fila[j] -> " + str(fila[j]) )
+              ##print("tablasolcion[j][Fila[j]] -> " + str(fila[j]) )
+
+              prod *= self.tablaSolucion[j][int(fila[j])-1][contClases] / ejsClase # P(X1|Hi) * P(X2|Hi) * ...
 
             else:
-              op1 = (1/(math.sqrt(2*math.pi*self.tablasAtributos[j][1][contClases])))
-              op2 =math.exp((-(fila[j]-self.tablasAtributos[j][0][contClases]))/(2*self.tablasAtributos[j][1][contClases]))
+              op1 = (1/(math.sqrt(2*math.pi*self.tablaSolucion[j][1][contClases])))
+              op2 = math.exp((-((int(fila[j]))-self.tablaSolucion[j][0][contClases]))/(2*self.tablaSolucion[j][1][contClases]))
+              
               prod *= op1*op2
 
             j += 1
-          
           prodHi[i] = prod
           contClases += 1
         
@@ -217,7 +227,7 @@ class ClasificadorNaiveBayes(Clasificador):
 
         '''CORRECION DE LAPACE'''
         if(laplace is True):  
-          print("Correccion de laplace")
+          ##print("Correccion de laplace")
           for elem in diccionarioSolucion.keys():
             for clase in diccionarioSolucion[elem].keys():
               diccionarioSolucion[elem][clase] += 1
@@ -236,7 +246,7 @@ class ClasificadorNaiveBayes(Clasificador):
       else:
         miDict = {}
         for e in clase:
-          print(e.index[0])
+          ##print(e.index[0])
           if miDict.__contains__(e):            
             miDict[e].append(int(datosTrain[clase.index[0]]))
           else:
@@ -260,7 +270,7 @@ class ClasificadorNaiveBayes(Clasificador):
         media = datosTrain.mean()
         #varianza = datosTrain.std(ddof=0)
         varianza = 0
-        print(media)
+        ##print(media)
         return (media,varianza)
 
 
