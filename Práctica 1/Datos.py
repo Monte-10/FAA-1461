@@ -75,7 +75,7 @@ class Datos:
         return temp
     
     
-    # Devuelve el subconjunto de los datos cuyos �ndices se pasan como argumento
+    # Devuelve el subconjunto de los datos cuyos indices se pasan como argumento
     def extraeDatos(self,idx):
         return np.take(self.datos,idx,axis=0)
 

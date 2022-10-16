@@ -90,7 +90,7 @@ class ClasificadorNaiveBayes(Clasificador):
       # while i < len(datosTrain.keys()) -1: #-1 porque la clase no la voy a mandar
       #   probCondicionadas[i] = self.getProbabilidadesCondicionadas(prioris, datosTrain[datosTrain.keys()[i]], nominalAtributos[i],datosTrain[datosTrain.keys()[-1]],conteoClase,laplace) 
       #   i += 1
-      probCondicionadas[i] = self.getProbabilidadesCondicionadas(prioris, datosTrain[datosTrain.keys()[1]], nominalAtributos[1],datosTrain[datosTrain.keys()[-1]],conteoClase,laplace) 
+      probCondicionadas = self.getProbabilidadesCondicionadas(prioris, datosTrain[datosTrain.keys()[1]], nominalAtributos[1],datosTrain[datosTrain.keys()[-1]],conteoClase,laplace) 
       
       print("\n\n\nCondicionadas: " + str(probCondicionadas))
 
@@ -98,7 +98,6 @@ class ClasificadorNaiveBayes(Clasificador):
 
     def clasifica(self,datosTest,atributos,dicc):
       pred = []
-
       for fila in datosTest:
         # Calculamos PRODj [(P(Xj|Hi)*P(Hi))] para cada clase
         prodHi = {}
@@ -209,13 +208,17 @@ class ClasificadorNaiveBayes(Clasificador):
         i = 0
         return diccionarioFinal
       else:
-        counter = 0
         miDict = {}
         for e in clase:
-          miDict[e] = []
-          miDict[e].append(int(datosTrain[counter]))
-          counter += 1
-        print(miDict)
+          print(datosTrain[clase.index[0]][0])
+          if miDict.__contains__(e):            
+            print(type(datosTrain[clase.index[0]]))
+            miDict[e].append(datosTrain[clase.index[0]])
+          else:
+            miDict[e] = []
+            print(type(datosTrain[clase.index[0]]))
+            miDict[e].append(datosTrain[clase.index[0]])
+
         '''{clase=N : [1,4,2,...,N]}'''
         diccionarioSolucion = {}
         for elem in miDict.keys():
@@ -224,15 +227,12 @@ class ClasificadorNaiveBayes(Clasificador):
           mean = sum(lista) / len(lista)
           var = sum((l-mean)**2 for l in lista) / len(lista)
           '''desviacion estandar'''
-          st_dev = math.sqrt(var)
-          
+          st_dev = math.sqrt(var)          
           diccionarioSolucion[elem] = (mean,st_dev)
-        print(diccionarioSolucion)
         return diccionarioSolucion
         '''{clase = 1: (media,desviacion tipica),clase = 2: (media,desviacion tipica)}'''
         '''calcular media y desviacion tipica para cada valor de la clase '''
-        print(type(datosTrain))
-        print(datosTrain)
+       
         media = datosTrain.mean()
         #varianza = datosTrain.std(ddof=0)
         varianza = 0
