@@ -10,13 +10,12 @@ dataset = Datos('ConjuntoDatos/german.csv')
 #print(dataset.datos["Class"][0]) #selecciona, de la columna Class, el valor que está en la fila 0
 #print(dataset.datos.keys())
 clasificador = ClasificadorNaiveBayes()
-validacionCruzada = EstrategiaParticionado.ValidacionCruzada(5)
-validacionCruzada.creaParticiones(dataset.datos)
-total = []
-for i in range(5):
-    print(validacionCruzada.particiones[i].indicesTrain)
 
-clasificador.entrenamiento(dataset.extraeDatos(total) , dataset.nominalAtributos, laplace=True)
+validacionSimple = EstrategiaParticionado.ValidacionSimple(30,1)
+validacionSimple.creaParticiones(dataset.datos)
+total = []
+print(dataset.diccionario)
+clasificador.entrenamiento(dataset.extraeDatos(validacionSimple.particiones[0].indicesTrain) , dataset.nominalAtributos, False,dataset.diccionario)
 #clasificador.entrenamiento(dataset.extraeDatos(validacionSimple), dataset.nominalAtributos, laplace=False)
 """
 estrategiaUno=EstrategiaParticionado.ValidacionCruzada(10)
