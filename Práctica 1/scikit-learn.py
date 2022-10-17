@@ -102,7 +102,7 @@ porcentaje = (y_test != y_pred).sum() / X_test.shape[0] * 100
 print("Porcentaje error: " + str(porcentaje) + "%")
 
 
-print("\n\n>>> CON CROSS_VAL_SCORE..... ")
+print("\n\n>>> CON VALIDACION CRUZADA..... ")
 x = atrs.fit_transform(dataset2.datos.iloc[:,:-1]).toarray()
 y = dataset2.datos.iloc[:,-1]
 print(">>>---- GAUSSIAN tic-tac-toe.csv")

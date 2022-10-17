@@ -64,11 +64,13 @@ class Clasificador:
     particionado.creaParticiones(dataset.datos, seed)
     errores = []
 
-    for i in particionado.particiones:
-      datosTrain = dataset.extraeDatos(i.indicesTrain)
-      datosTest = dataset.extraeDatos(i.indicesTest)
-
+    for particion in particionado.particiones:
+      #extraemos los datos de train y de test de nuestro dataset
+      datosTrain = dataset.extraeDatos(particion.indicesTrain)
+      datosTest = dataset.extraeDatos(particion.indicesTest)
+      #entrenamos nuestro clasificador
       clasificador.entrenamiento(datosTrain, dataset.nominalAtributos,laPlace, dataset.diccionario)
+      #realizamos las predicciones y calculamos el error de cada particion.
       predicciones = clasificador.clasifica(datosTest, dataset.nominalAtributos, dataset.diccionario)
       errores.append(self.error(datosTest, predicciones))
     #print(statistics.mean(errores))
@@ -137,13 +139,13 @@ class ClasificadorNaiveBayes(Clasificador):
       
       ##print(datosTest)
       for index,fila in datosTest.iterrows():
-        # Calculamos PRODj [(P(Xj|Hi)*P(Hi))] para cada clase
+        
         ##print(fila)
         prodHi = {}
 
         contClases = 0
-        for i in self.prioris: 
-          pHi = self.prioris[i] # P(Hi)
+        for priori in self.prioris: 
+          pHi = self.prioris[priori] 
           ##print("pHi ->" + str(pHi))
           j = 0
           prod = pHi
@@ -157,9 +159,7 @@ class ClasificadorNaiveBayes(Clasificador):
               ##print(ejsClase)
               ##print("Fila[j] -> " + str(fila[j]) )
               ##print("tablasolcion[j][Fila[j]] -> " + str(fila[j]) )
-
-              prod *= self.tablaSolucion[j][int(fila[j])-1][contClases] / ejsClase # P(X1|Hi) * P(X2|Hi) * ...
-
+              prod *= self.tablaSolucion[j][int(fila[j])-1][contClases] / ejsClase 
             else:
               op1 = (1/(math.sqrt(2*math.pi*self.tablaSolucion[j][1][contClases])))
               op2 = math.exp((-((int(fila[j]))-self.tablaSolucion[j][0][contClases]))/(2*self.tablaSolucion[j][1][contClases]))
@@ -167,10 +167,10 @@ class ClasificadorNaiveBayes(Clasificador):
               prod *= op1*op2
 
             j += 1
-          prodHi[i] = prod
+          prodHi[priori] = prod
           contClases += 1
         
-        pred.append(max(prodHi, key=prodHi.get)) # Decision = argmax_Hi PRODj [(P(Xj|Hi)*P(Hi))]
+        pred.append(max(prodHi, key=prodHi.get)) #seleccionamos el maximo de cada producto de hi
       
       return pred
     
@@ -288,9 +288,3 @@ def dist_normal(m,v,n):
       return densidad
 
  
-    
-  
-
-##############################################################################
-
-
