@@ -329,7 +329,8 @@ def entrenamiento(self,datosTotales, datosNormalizar, atributosNominal, atributo
   self.calcularMediaDesviacion(datosNormalizar,atributosNominalNormalizar) 
   self.normalizarDatos(datosTotales,atributosNominal)
 
-
+def clasifica(self,datosTest,nominalAtributos,diccionario):
+  
 
 
 
