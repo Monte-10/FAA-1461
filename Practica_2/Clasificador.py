@@ -330,7 +330,7 @@ def entrenamiento(self,datosTotales, datosNormalizar, atributosNominal, atributo
   self.normalizarDatos(datosTotales,atributosNominal)
 
 def clasifica(self,datosTest,nominalAtributos,diccionario):
-  
+  pass
 
 
 
