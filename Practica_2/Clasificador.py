@@ -287,7 +287,6 @@ class ClasificadorKNN(Clasificador):
   def __init__(self) -> None:
     super().__init__()
   #Se eligen estos metodos aqui porque(y además porque forma parte del entrenamiento de k-nn) para cumplir con la estructura de metodo que se nos da en el enunciado, es necesario itener variables de instancia que ugarden el valor de la desviacion tipica y la media para la normalizacion de los datos por lo tanto tendrá que ir dentro de cada objeto clasificador vecinos, yo creo que debería ser en datos porque -> porque todas las operaciones que se realicen sobre los datos, deben estar encapsuladas aqui. De tal forma que puedas operar sobre un dataset sin tener que involucrar a otras clases para reducir dependencias
-  #RETURN tuple of mean and std of all of the values passed in datos. In that order
   def calcularMediaDesviacion(self,datos,nominalAtributos):
       lista = []
       for elem in datos.values:
@@ -346,11 +345,11 @@ def dist_normal(m,v,n):
       densidad = base*math.pow(math.e,exp)
       return densidad
 
-def distanciaEuclidea(self,array) {
+def distanciaEuclidea(self,array):
   d = 0
   for elem in array:
     d += math.pow(elem,2)
-}
+    
 
 ''' Tambien se puede usar esto para la distancia
 def distance(self, X1, X2):

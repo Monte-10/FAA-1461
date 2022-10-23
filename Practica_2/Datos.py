@@ -27,6 +27,7 @@ class Datos:
 
     def getOrderedDict(self,csvReader):
         headers = self.getHeaders(csvReader)
+
         rows = []
         for row in csvReader:
             rows.append(row)
@@ -40,13 +41,11 @@ class Datos:
 
         counter = 0
         primero = []
-        
-        for h in headers:
-            
+        for h in headers:            
             primero.append([])
-
             for fila in rows:
-                primero[counter].append(fila[counter])
+                if len(fila) > 0:
+                    primero[counter].append(fila[counter])
             counter += 1        
         
         counter = 0
