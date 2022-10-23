@@ -74,7 +74,7 @@ class Clasificador:
       predicciones = clasificador.clasifica(datosTest, dataset.nominalAtributos, dataset.diccionario)
       errores.append(self.error(datosTest, predicciones))
     #print(statistics.mean(errores))
-    return errores                                                    
+    return errores                                           
     
     
  
@@ -281,10 +281,6 @@ class ClasificadorNaiveBayes(Clasificador):
 
       pass
 
-
-
-
-
 class ClasificadorKNN(Clasificador):
 
 
@@ -292,7 +288,7 @@ class ClasificadorKNN(Clasificador):
     super().__init__()
   #Se eligen estos metodos aqui porque(y además porque forma parte del entrenamiento de k-nn) para cumplir con la estructura de metodo que se nos da en el enunciado, es necesario itener variables de instancia que ugarden el valor de la desviacion tipica y la media para la normalizacion de los datos por lo tanto tendrá que ir dentro de cada objeto clasificador vecinos, yo creo que debería ser en datos porque -> porque todas las operaciones que se realicen sobre los datos, deben estar encapsuladas aqui. De tal forma que puedas operar sobre un dataset sin tener que involucrar a otras clases para reducir dependencias
   #RETURN tuple of mean and std of all of the values passed in datos. In that order
-  def calcularMediaDesviacion(self,datos,nominalAtributos):    
+  def calcularMediaDesviacion(self,datos,nominalAtributos):
       lista = []
       for elem in datos.values:
           for i in elem:
@@ -329,20 +325,16 @@ def entrenamiento(self,datosTotales, datosNormalizar, atributosNominal, atributo
   self.calcularMediaDesviacion(datosNormalizar,atributosNominalNormalizar) 
   self.normalizarDatos(datosTotales,atributosNominal)
 
+
 def clasifica(self,datosTest,nominalAtributos,diccionario):
-  pass
+  '''clasificacion = clases = []
+  self.indicesTest = datosTest[:,:-1]
+  self.indicesTrain = datos
 
-
-
-
-
-
-
-
-
-
-
-
+  longitud = len(self.indicesTest[0])
+  for i in range(self.indicesTest.shape[0]):
+    d = []
+    for j in range(self.indicesTrain):'''
 
 
 def dist_normal(m,v,n):
@@ -353,5 +345,21 @@ def dist_normal(m,v,n):
       base = 1/math.sqrt(2*math.pi*v)
       densidad = base*math.pow(math.e,exp)
       return densidad
+
+def distanciaEuclidea(self,array) {
+  d = 0
+  for elem in array:
+    d += math.pow(elem,2)
+}
+
+''' Tambien se puede usar esto para la distancia
+def distance(self, X1, X2):
+  distance = scipy.spatial.distance.euclidean(X1, X2)'''
+
+def distancia_knn(self, value):
+  try:
+    return 1/value
+  except:
+    return 0.0
 
  
