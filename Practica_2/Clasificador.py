@@ -326,14 +326,16 @@ def entrenamiento(self,datosTotales, datosNormalizar, atributosNominal, atributo
 
 
 def clasifica(self,datosTest,nominalAtributos,diccionario):
-  '''clasificacion = clases = []
+  clasificacion = []
   self.indicesTest = datosTest[:,:-1]
-  self.indicesTrain = datos
-
+  distancia_minima = 1000000
+  
   longitud = len(self.indicesTest[0])
   for i in range(self.indicesTest.shape[0]):
-    d = []
-    for j in range(self.indicesTrain):'''
+    for j in range(self.indicesTest.shape[0]):
+      distancia = distance(i,j)
+      if distancia <= distancia_minima:
+        distancia_minima = distancia
 
 
 def dist_normal(m,v,n):
@@ -354,6 +356,10 @@ def distanciaEuclidea(self,array):
 ''' Tambien se puede usar esto para la distancia
 def distance(self, X1, X2):
   distance = scipy.spatial.distance.euclidean(X1, X2)'''
+  
+def distance(list1,list2):
+  squares = [(p-q) ** 2 for p, q in zip(list1, list2)]
+  return sum(squares) ** .5
 
 def distancia_knn(self, value):
   try:
