@@ -9,6 +9,8 @@ import EstrategiaParticionado
 from Datos import *
 from functools import reduce
 from scipy.stats import norm
+from scipy.spatial.distance import euclidean
+import scipy
 import statistics
 import collections
 class Clasificador:
@@ -325,18 +327,12 @@ def entrenamiento(self,datosTotales, datosNormalizar, atributosNominal, atributo
   self.normalizarDatos(datosTotales,atributosNominal)
 
 
-def clasifica(self,datosTest,nominalAtributos,diccionario):
-  clasificacion = []
-  self.indicesTest = datosTest[:,:-1]
-  distancia_minima = 1000000
+def clasifica(self, datosTest, datosTrain, numero, nominalAtributos, diccionario):
   
-  longitud = len(self.indicesTest[0])
-  for i in range(self.indicesTest.shape[0]):
-    for j in range(self.indicesTest.shape[0]):
-      distancia = distance(i,j)
-      if distancia <= distancia_minima:
-        distancia_minima = distancia
-
+  for i in range(len(self.datosTest)):
+    for j in range(len(self.datosTrain)):
+      distancia = distance(datosTest[i],datosTrain[j])
+      distanciaTotal+=distancia
 
 def dist_normal(m,v,n):
       if (v == 0):
@@ -346,16 +342,6 @@ def dist_normal(m,v,n):
       base = 1/math.sqrt(2*math.pi*v)
       densidad = base*math.pow(math.e,exp)
       return densidad
-
-def distanciaEuclidea(self,array):
-  d = 0
-  for elem in array:
-    d += math.pow(elem,2)
-    
-
-''' Tambien se puede usar esto para la distancia
-def distance(self, X1, X2):
-  distance = scipy.spatial.distance.euclidean(X1, X2)'''
   
 def distance(list1,list2):
   squares = [(p-q) ** 2 for p, q in zip(list1, list2)]
@@ -367,4 +353,6 @@ def distancia_knn(self, value):
   except:
     return 0.0
 
+def distance(self, X1, X2):
+  distance = scipy.spatial.distance.euclidean(X1, X2)
  
