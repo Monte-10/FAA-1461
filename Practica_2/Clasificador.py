@@ -1,4 +1,5 @@
 from abc import ABCMeta,abstractmethod
+from timeit import repeat
 from xmlrpc.client import boolean
 
 from zmq import THREAD_AFFINITY_CPU_REMOVE
@@ -293,7 +294,7 @@ class ClasificadorKNN(Clasificador):
       lista = []
       for elem in datos.values:
           for i in elem:
-              if isfloat(i):
+              if checkfloat(i):
                   lista.append(float(i))
               else:
                   lista.append(int(i))
@@ -322,37 +323,75 @@ class ClasificadorKNN(Clasificador):
     print(datos)   
 
 
-def entrenamiento(self,datosTotales, datosNormalizar, atributosNominal, atributosNominalNormalizar): #entrenamiento tiene que tener los mismos valores que la clase abstracta que implementa.
-  self.calcularMediaDesviacion(datosNormalizar,atributosNominalNormalizar) 
-  self.normalizarDatos(datosTotales,atributosNominal)
+  def entrenamiento(self,datosTotales, datosNormalizar, atributosNominal, atributosNominalNormalizar): #entrenamiento tiene que tener los mismos valores que la clase abstracta que implementa.
+    self.calcularMediaDesviacion(datosNormalizar,atributosNominalNormalizar) 
+    self.normalizarDatos(datosTotales,atributosNominal)
 
 
-def clasifica(self, datosTest, datosTrain, numero, nominalAtributos, diccionario):
+  def clasifica(self, datosTest, datosTrain, nominalAtributos,k):
+    atr = datosTest.keys()
+    print(euclideanDistance)
+    distancias = [] #distancia total de cada fila de test, con todas las de train (index, valor). Cada fila de test, tendra este array. 
+    atributos = [] #distancia independiente entre atributos, luego habra que sumar todas estas distancias
+    print(datosTrain)
+    
+    listaClases = []
+    for index1,x1 in datosTest.iterrows():
+      for index2,x2 in datosTrain.iterrows():
+        atributos = []
+        for i in range(len(datosTrain.keys())): #solo hasta len, porque no queremos la clase
+          if nominalAtributos[i] is False:
+            atributos.append(euclideanDistance(x1[atr[i]],x2[atr[i]]))
+        
+        distancias.append((index2,sum(atributos)))
+      
+      clasesSolucion = []
+      for j in range(k):
+        min = (0,999999999)
+        clasesSolucion.append([])
+        
+        for elem in distancias:
+          if elem[1] < min[1]:
+            min = elem
+        clasesSolucion[j] = min   
+        distancias.remove(min)
+      #print(f'Los k minimo valor de todas las distancias son:{clasesSolucion}')
+      repeated_values = []
+      for j in range(k):
+        repeated_values.append(datosTrain[atr[-1]].loc[clasesSolucion[j][0]])    
+      #listaClases.append((index1,max(set(repeated_values),key=repeated_values.count))) #aniadimos a la lista el indice de test con la clase mas predicha
+      listaClases.append(max(set(repeated_values),key=repeated_values.count)) #aniadimos a la lista el indice de test con la clase mas predicha
+    #   print(f'Seleccionamos los k valores mas repetidos{repeated_values}')
+    #   print(f'El valor mas repetido es:{max(set(repeated_values),key=repeated_values.count)}')  
+    # print(f'clases solucion {listaClases}')
+    self.clasesPredichas = listaClases
+    return listaClases
+
   
-  for i in range(len(self.datosTest)):
-    for j in range(len(self.datosTrain)):
-      distancia = distance(datosTest[i],datosTrain[j])
-      distanciaTotal+=distancia
 
-def dist_normal(m,v,n):
-      if (v == 0):
-        v += math.pow(10, -6)
+def checkfloat(num):
+    try:
+        float(num)
+        return True
+    except ValueError:
+        return False
 
-      exp = -(math.pow((n-m), 2)/(2*v))
-      base = 1/math.sqrt(2*math.pi*v)
-      densidad = base*math.pow(math.e,exp)
-      return densidad
-  
-def distance(list1,list2):
-  squares = [(p-q) ** 2 for p, q in zip(list1, list2)]
-  return sum(squares) ** .5
 
-def distancia_knn(self, value):
-  try:
-    return 1/value
-  except:
-    return 0.0
 
-def distance(self, X1, X2):
-  distance = scipy.spatial.distance.euclidean(X1, X2)
+
+def euclideanDistance(x1, x2):
+  if isinstance(x1, str):
+    if checkfloat(x1) is True:
+      x1 = float(x1)
+    else:
+      x1 = int(x1)
+
+  if isinstance(x2, str):
+    if checkfloat(x2) is True:
+      x2 = float(x2)
+    else:
+      x2 = int(x2)
+    
+  return np.linalg.norm(x2-x1)
+
  

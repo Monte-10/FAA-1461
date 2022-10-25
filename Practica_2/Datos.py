@@ -90,10 +90,3 @@ def isfloat(num):
         return False
 
 
-if __name__ == '__main__':
-    
-    dataset = Datos('ConjuntosDatosP2/wdbc.csv')
-    clasificador = ClasificadorKNN()
-    
-    clasificador.calcularMediaDesviacion(dataset.datos.iloc[:,0:2],dataset.nominalAtributos[0:2])
-    clasificador.normalizarDatos(dataset.datos,dataset.nominalAtributos)
