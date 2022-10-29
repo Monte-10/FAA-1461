@@ -2,23 +2,26 @@
 from Datos import Datos
 from Clasificador import *
 import EstrategiaParticionado as EstrategiaParticionado
-dataset = Datos('ConjuntosDatosP2/wdbc.csv')
+dataset = Datos('ConjuntosDatosP2/pima-indians-diabetes.csv')
 clasificador = ClasificadorKNN()
 
-# print(dataset.datos)
-# print(type(dataset.datos['Atr2']))
-# print(dataset.datos['Atr2'].mean())
 
-#print(dataset.datos["Class"][0]) #selecciona, de la columna Class, el valor que está en la fila 0
-#print(dataset.datos.keys())
-
-
-validacionSimple = EstrategiaParticionado.ValidacionSimple(30,1)
+validacionSimple = EstrategiaParticionado.ValidacionSimple(40,5)
 validacionCruzada = EstrategiaParticionado.ValidacionCruzada(4)
 
 validacionSimple.creaParticiones(dataset.datos)
+errores = []
+#print(dataset.extraeDatos(validacionSimple.particiones[0].indicesTest))
+
 clasificador.calcularMediaDesviacion(dataset.datos,dataset.nominalAtributos)
 clasificador.normalizarDatos(dataset.datos,dataset.nominalAtributos)#TODO: normaliza es muy lento, hay que ver que está pasando. Además que si le pasas un porcentaje de la tabla no esta normalizando despues esos campos
-predicciones = clasificador.clasifica(dataset.extraeDatos(validacionSimple.particiones[0].indicesTest), dataset.extraeDatos(validacionSimple.particiones[0].indicesTrain),dataset.nominalAtributos,3)
-errores = clasificador.error(dataset.extraeDatos(validacionSimple.particiones[0].indicesTest),predicciones)
-print(f'{errores * 100}%')
+
+print(f'Indices Test:\n{dataset.extraeDatos(validacionSimple.particiones[0].indicesTest)}')
+for i in range(5):
+    
+    predicciones = clasificador.clasifica(dataset.extraeDatos(validacionSimple.particiones[i].indicesTest), dataset.extraeDatos(validacionSimple.particiones[i].indicesTrain),dataset.nominalAtributos,3)
+    print(predicciones)
+    error = clasificador.error(dataset.extraeDatos(validacionSimple.particiones[i].indicesTest),predicciones)
+    print(error)
+    errores.append(error) 
+print(f'{np.mean(errores) * 100}%')
