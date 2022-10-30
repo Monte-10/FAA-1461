@@ -47,11 +47,21 @@ class Kmeans2:
         print(miClusterNP)
         
         # print(miClusterNP)
-        CM = np.average(miClusterNP[:,:], axis=0) # CON ESTO OBTENEMOS EL VECTOR MEDIA.
-        #print(CM)
+        cm = np.average(miClusterNP[:,:], axis=0) # CON ESTO OBTENEMOS EL VECTOR MEDIA.
+        print(cm)
+        shortestDistance = 99999
+        shortestIndex = []
+        for elem in miClusterNP:
+            distancia = distance(cm[:-1],elem[:-1])
+            if distancia < shortestDistance:
+                shortestDistance = distancia
+            # distance(cm[:-1],elem[:-1]) #la clase no se utiliza para calcular la distancia
+            shortestDistance.append(distance(cm[:-1],elem[:-1])) #la clase no se utiliza para calcular la distancia)
+            shortestIndex.
+        print(min(shortestDistance))
         
         
-        miLista = []
+        
         #print(f'He entrado en recalculo y este es el valor de la fila {self.data.loc[self.idx[0][0].squeeze()]}')
 
         
@@ -161,12 +171,12 @@ class KMeans:
 if __name__ == '__main__':
 
     dataset = Datos('ConjuntosDatosP2/iris.csv')
-    km = KMeans(3)  
-    print(type(dataset.datos))
-    km.fit(dataset.datos)
-    print(km.labels)
-    #km.getRandomClusters() #TODO: ¿cada cluster contiene varios patrones?
-    #km.getCentroideMasCercano()
+    km = Kmeans2(3,dataset.datos)  
+    # print(type(dataset.datos))
+    # km.fit(dataset.datos)
+    # print(km.labels)
+    km.getRandomClusters() #TODO: ¿cada cluster contiene varios patrones?
+    km.getCentroideMasCercano()
 
 
     # import numpy
