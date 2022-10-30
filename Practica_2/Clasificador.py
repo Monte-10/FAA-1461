@@ -50,7 +50,7 @@ class Clasificador:
     for i in range(datos.shape[0] - 1 ): #numero de elementos de cada atributo
       if datos[datos.keys()[-1]].values[i] != pred[i]:
         err += 1
-    
+      
       # if datos['Class'][i] != pred[i]:
       #   err += 1
     #print("Total error:" + str(err) + "total datos: " + str(datos.shape[0]))
@@ -311,15 +311,15 @@ class ClasificadorKNN(Clasificador):
     
     print(datos)
     for elem in datos.keys():
-      lista = []
-      if nominalAtributos[i] is False:
-        for value in datos[elem]:
-          
-          if value not in lista:
-            normalizado = (float(value) - self.mediaNormalizacion) / self.desviacionTipicaNormalizacion
-            datos[elem] = datos[elem].replace([value],normalizado)
-          lista.append(value)
-      i +=1
+      if elem is not datos.keys()[-1]:
+        lista = []
+        if nominalAtributos[i] is False:
+          for value in datos[elem]:
+            if value not in lista:
+              normalizado = (float(value) - self.mediaNormalizacion) / self.desviacionTipicaNormalizacion
+              datos[elem] = datos[elem].replace([value],normalizado)
+            lista.append(value)
+        i +=1
     print(datos)   
 
 
@@ -330,39 +330,77 @@ class ClasificadorKNN(Clasificador):
 
   def clasifica(self, datosTest, datosTrain, nominalAtributos,k):
     atr = datosTest.keys()
-    print(euclideanDistance)
+    #print(f'Los datosTest tienen las siguientes columnas:{atr} cuya len es {len(atr)}')
     distancias = [] #distancia total de cada fila de test, con todas las de train (index, valor). Cada fila de test, tendra este array. 
     atributos = [] #distancia independiente entre atributos, luego habra que sumar todas estas distancias
-    print(datosTrain)
     
     listaClases = []
     for index1,x1 in datosTest.iterrows():
-      for index2,x2 in datosTrain.iterrows():
-        atributos = []
-        for i in range(len(datosTrain.keys())): #solo hasta len, porque no queremos la clase
-          if nominalAtributos[i] is False:
-            atributos.append(euclideanDistance(x1[atr[i]],x2[atr[i]]))
-        
-        distancias.append((index2,sum(atributos)))
       
-      clasesSolucion = []
-      for j in range(k):
-        min = (0,999999999)
-        clasesSolucion.append([])
+      for index2,x2 in datosTrain.iterrows():
+        lista1 = []
+        lista2 = []
+        #print(f'Voy a comparar la fila {index1} con la fila {index2} y calcularé todas sus distancias.')
+        atributos = []
+            #print(f"Distancia euclidiana entre {x1[atr[i]]} y {x2[atr[i]]} = {euclideanDistance(x1[atr[i]],x2[atr[i]])}")
+            
+            #atributos.append(euclideanDistance(x1[atr[i]],x2[atr[i]]))#TODO: probar a pasar atr entero y hacer como en k-means
+            #print(f'Entro en la columna {i}')
+        for i in x1.items(): #datos
+          if i[0] != atr[-1]: #la distancia no la calculamos con la clase. Sino con el resto de los atributos
+            if checkfloat(i[1]):
+              lista1.append(float(i[1]))
+            else:
+              lista1.append(int(i[1]))
+        for i in x2.items(): #clusters
+          if i[0] != atr[-1]:
+            if checkfloat(i[1]):
+              lista2.append(float(i[1]))
+            else:
+              lista2.append(int(i[1]))
+        #print(f'\nINDICE:{index1}\n{lista1}\nINDICE:{index2}\n{lista2}\n\n' )
+        dist = distance(lista1,lista2)
+        #print(f'Distancia:{dist}')
+        #print(f'la distancia euclidiana es: {sum(atributos)}')
+        distancias.append((index2,dist))
         
-        for elem in distancias:
-          if elem[1] < min[1]:
-            min = elem
-        clasesSolucion[j] = min   
-        distancias.remove(min)
-      #print(f'Los k minimo valor de todas las distancias son:{clasesSolucion}')
+        
+      
+      clasesSolucion = [] #lista de tamano K que contiene los k menores distancias de cada fila de test
+      s = []
+      # for all in distancias:
+      #   s.append(all[1])
+      # s.sort()
+      # print(s)
+
+      # for j in range(k):
+      #   min = (0,999999999)
+      #   clasesSolucion.append([])
+        
+      #   for elem in distancias:
+      #     if elem[1] < min[1]:
+      #       min = elem
+      #   clasesSolucion[j] = min   
+      #   print(f'Min : {min}')  
+      #   if distancias.__contains__(min):
+      #     distancias.remove(min)
+      
+      listaOrdenada = sorted(distancias,key=lambda x: x[1])
+      
+      #print(f'Los k minimo valor de todas las distancias son:{listaOrdenada[:k]}')
       repeated_values = []
       for j in range(k):
-        repeated_values.append(datosTrain[atr[-1]].loc[clasesSolucion[j][0]])    
+        #print(f'vamos a meter el valor {datosTrain.loc[clasesSolucion[j][0]]} a la lista porque es uno de los menores')
+        repeated_values.append(datosTrain[atr[-1]].loc[listaOrdenada[j][0]])    #seleccionaremos los k valores mas repetidos
+        print(f'Localizame el atributo en la posicion {listaOrdenada[j][0]} de la clase en train. Yo creo que es -> {datosTrain[atr[-1]].loc[listaOrdenada[j][0]]}')
       #listaClases.append((index1,max(set(repeated_values),key=repeated_values.count))) #aniadimos a la lista el indice de test con la clase mas predicha
+      #print(f'{x1} -> predice la clase {max(set(repeated_values),key=repeated_values.count)}')
       listaClases.append(max(set(repeated_values),key=repeated_values.count)) #aniadimos a la lista el indice de test con la clase mas predicha
-    #   print(f'Seleccionamos los k valores mas repetidos{repeated_values}')
-    #   print(f'El valor mas repetido es:{max(set(repeated_values),key=repeated_values.count)}')  
+      #print(f'Seleccionamos los k valores mas repetidos{repeated_values}')
+      #print(f'El valor mas repetido para el datosTest {index1} es:{max(set(repeated_values),key=repeated_values.count)}')  
+      
+      
+      
     # print(f'clases solucion {listaClases}')
     self.clasesPredichas = listaClases
     return listaClases
@@ -377,7 +415,17 @@ def checkfloat(num):
         return False
 
 
-
+            
+def distance(list1,list2):
+    """Distance between two vectors."""
+    #squares = [(p-q) ** 2 for p, q in zip(list1, list2)]
+    #return sum(squares) ** .5
+    distancia = 0
+    total = len(list1)
+    for i in range(total):
+        distancia +=  np.linalg.norm(list1[i]-list2[i])
+    return distancia
+    
 
 def euclideanDistance(x1, x2):
   if isinstance(x1, str):
@@ -392,6 +440,6 @@ def euclideanDistance(x1, x2):
     else:
       x2 = int(x2)
     
-  return np.linalg.norm(x2-x1)
+  return np.linalg.norm(x1-x2)
 
  
