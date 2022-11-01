@@ -421,7 +421,7 @@ def distance(list1,list2):
     #squares = [(p-q) ** 2 for p, q in zip(list1, list2)]
     #return sum(squares) ** .5
     distancia = 0
-    total = len(list1)
+    total = len(list1) - 1
     for i in range(total):
         distancia +=  np.linalg.norm(list1[i]-list2[i])
     return distancia
