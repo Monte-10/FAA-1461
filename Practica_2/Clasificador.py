@@ -48,6 +48,7 @@ class Clasificador:
   def error(self,datos,pred):
     err = 0
     for i in range(datos.shape[0] - 1 ): #numero de elementos de cada atributo
+      #print(f'¿{datos[datos.keys()].values[i]} != {pred[i]}?')
       if datos[datos.keys()[-1]].values[i] != pred[i]:
         err += 1
       
@@ -75,6 +76,7 @@ class Clasificador:
       clasificador.entrenamiento(datosTrain, dataset.nominalAtributos,laPlace, dataset.diccionario)
       #realizamos las predicciones y calculamos el error de cada particion.
       predicciones = clasificador.clasifica(datosTest, dataset.nominalAtributos, dataset.diccionario)
+      
       errores.append(self.error(datosTest, predicciones))
     #print(statistics.mean(errores))
     return errores                                           
@@ -331,21 +333,15 @@ class ClasificadorKNN(Clasificador):
   def clasifica(self, datosTest, datosTrain, nominalAtributos,k):
     atr = datosTest.keys()
     #print(f'Los datosTest tienen las siguientes columnas:{atr} cuya len es {len(atr)}')
-    distancias = [] #distancia total de cada fila de test, con todas las de train (index, valor). Cada fila de test, tendra este array. 
     atributos = [] #distancia independiente entre atributos, luego habra que sumar todas estas distancias
     
     listaClases = []
     for index1,x1 in datosTest.iterrows():
-      
+      distancias = [] #distancia total de cada fila de test, con todas las de train (index, valor). Cada fila de test, tendra este array. 
+
       for index2,x2 in datosTrain.iterrows():
         lista1 = []
         lista2 = []
-        #print(f'Voy a comparar la fila {index1} con la fila {index2} y calcularé todas sus distancias.')
-        atributos = []
-            #print(f"Distancia euclidiana entre {x1[atr[i]]} y {x2[atr[i]]} = {euclideanDistance(x1[atr[i]],x2[atr[i]])}")
-            
-            #atributos.append(euclideanDistance(x1[atr[i]],x2[atr[i]]))#TODO: probar a pasar atr entero y hacer como en k-means
-            #print(f'Entro en la columna {i}')
         for i in x1.items(): #datos
           if i[0] != atr[-1]: #la distancia no la calculamos con la clase. Sino con el resto de los atributos
             if checkfloat(i[1]):
@@ -365,37 +361,22 @@ class ClasificadorKNN(Clasificador):
         distancias.append((index2,dist))
         
         
-      
-      clasesSolucion = [] #lista de tamano K que contiene los k menores distancias de cada fila de test
-      s = []
-      # for all in distancias:
-      #   s.append(all[1])
-      # s.sort()
-      # print(s)
 
-      # for j in range(k):
-      #   min = (0,999999999)
-      #   clasesSolucion.append([])
-        
-      #   for elem in distancias:
-      #     if elem[1] < min[1]:
-      #       min = elem
-      #   clasesSolucion[j] = min   
-      #   print(f'Min : {min}')  
-      #   if distancias.__contains__(min):
-      #     distancias.remove(min)
-      
+      listaOrdenada = []
       listaOrdenada = sorted(distancias,key=lambda x: x[1])
-      
+      #print(listaOrdenada)
+      #print(f'{listaOrdenada}')
       #print(f'Los k minimo valor de todas las distancias son:{listaOrdenada[:k]}')
+      
       repeated_values = []
       for j in range(k):
-        #print(f'vamos a meter el valor {datosTrain.loc[clasesSolucion[j][0]]} a la lista porque es uno de los menores')
+        # print(f'vamos a meter el valor {datosTrain.loc[clasesSolucion[j][0]]} a la lista porque es uno de los menores')
         repeated_values.append(datosTrain[atr[-1]].loc[listaOrdenada[j][0]])    #seleccionaremos los k valores mas repetidos
-        print(f'Localizame el atributo en la posicion {listaOrdenada[j][0]} de la clase en train. Yo creo que es -> {datosTrain[atr[-1]].loc[listaOrdenada[j][0]]}')
+        #print(f'{index1} Localizame el atributo en la posicion {listaOrdenada[j][0]} de la clase en train. Yo creo que es -> {datosTrain[atr[-1]].loc[listaOrdenada[j][0]]}')
       #listaClases.append((index1,max(set(repeated_values),key=repeated_values.count))) #aniadimos a la lista el indice de test con la clase mas predicha
       #print(f'{x1} -> predice la clase {max(set(repeated_values),key=repeated_values.count)}')
       listaClases.append(max(set(repeated_values),key=repeated_values.count)) #aniadimos a la lista el indice de test con la clase mas predicha
+      print(f'{index1} predice la clase -> {listaClases[-1]}')
       #print(f'Seleccionamos los k valores mas repetidos{repeated_values}')
       #print(f'El valor mas repetido para el datosTest {index1} es:{max(set(repeated_values),key=repeated_values.count)}')  
       
@@ -403,6 +384,7 @@ class ClasificadorKNN(Clasificador):
       
     # print(f'clases solucion {listaClases}')
     self.clasesPredichas = listaClases
+    #print(f'{listaClases} es la lista que contiene la clase más predicha. Supuestamente deberia estar ordenada por el mismo orden que indices Test. De tal forma que la posicion 0 de esta lista equivale al primer indice de indicestest ')
     return listaClases
 
   
@@ -417,14 +399,16 @@ def checkfloat(num):
 
             
 def distance(list1,list2):
-    """Distance between two vectors."""
-    #squares = [(p-q) ** 2 for p, q in zip(list1, list2)]
-    #return sum(squares) ** .5
-    distancia = 0
-    total = len(list1) - 1
-    for i in range(total):
-        distancia +=  np.linalg.norm(list1[i]-list2[i])
-    return distancia
+    """Euclidean Distance between two vectors."""
+    squares = [(p-q) ** 2 for p, q in zip(list1, list2)]
+    #print(f'La distancia entre {list1} y {list2} es: {sum(squares) ** .5}')
+    return sum(squares) ** .5
+    # distancia = 0
+    # total = len(list1) - 1
+    # for i in range(total):
+    #     distancia +=  np.linalg.norm(list1[i]-list2[i])
+    # print(f'La distancia entre {list1} y {list2} es: {distancia}')
+    # return distancia
     
 
 def euclideanDistance(x1, x2):
