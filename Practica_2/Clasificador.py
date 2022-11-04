@@ -376,7 +376,6 @@ class ClasificadorKNN(Clasificador):
       #listaClases.append((index1,max(set(repeated_values),key=repeated_values.count))) #aniadimos a la lista el indice de test con la clase mas predicha
       #print(f'{x1} -> predice la clase {max(set(repeated_values),key=repeated_values.count)}')
       listaClases.append(max(set(repeated_values),key=repeated_values.count)) #aniadimos a la lista el indice de test con la clase mas predicha
-      print(f'{index1} predice la clase -> {listaClases[-1]}')
       #print(f'Seleccionamos los k valores mas repetidos{repeated_values}')
       #print(f'El valor mas repetido para el datosTest {index1} es:{max(set(repeated_values),key=repeated_values.count)}')  
       

@@ -275,15 +275,15 @@ class KMeans:
 if __name__ == '__main__':
 
     dataset = Datos('ConjuntosDatosP2/iris.csv')
-    print(dataset.datos['Class'])
-    # clasificador.calcularMediaDesviacion(dataset.datos,dataset.nominalAtributos)
-    # clasificador.normalizarDatos(dataset.datos,dataset.nominalAtributos)#TODO: normaliza es muy lento, hay que ver que está pasando. Además que si le pasas un porcentaje de la tabla no esta normalizando despues esos campos
+    #print(dataset.datos['Class'])
+    #clasificador.calcularMediaDesviacion(dataset.datos,dataset.nominalAtributos)
+    #clasificador.normalizarDatos(dataset.datos,dataset.nominalAtributos)#TODO: normaliza es muy lento, hay que ver que está pasando. Además que si le pasas un porcentaje de la tabla no esta normalizando despues esos campos
     km = KMeans(1)  
     # print(type(dataset.datos))
     km.fit(dataset.datos)
     # print(km.clases)
-    print(km.clusterAlQuePertenece)
-    print(km.centroids)
+    # print(km.clusterAlQuePertenece)
+    # print(km.centroids)
     print(f'{km.error(dataset.datos) * 100}%')
     # km.getCentroideMasCercano()
 

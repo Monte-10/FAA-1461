@@ -16,8 +16,8 @@ errores = []
 
 clasificador.calcularMediaDesviacion(dataset.datos,dataset.nominalAtributos)
 clasificador.normalizarDatos(dataset.datos,dataset.nominalAtributos)#TODO: normaliza es muy lento, hay que ver que está pasando. Además que si le pasas un porcentaje de la tabla no esta normalizando despues esos campos
-print(f'Indices Test:\n{validacionSimple.particiones[0].indicesTest}')
-print(f'Indices Test:\n{dataset.extraeDatos(validacionSimple.particiones[0].indicesTest)}')
+#print(f'Indices Test:\n{validacionSimple.particiones[0].indicesTest}')
+#print(f'Indices Test:\n{dataset.extraeDatos(validacionSimple.particiones[0].indicesTest)}')
 for i in range(5):
     
     predicciones = clasificador.clasifica(dataset.extraeDatos(validacionSimple.particiones[i].indicesTest), dataset.extraeDatos(validacionSimple.particiones[i].indicesTrain),dataset.nominalAtributos,3)
