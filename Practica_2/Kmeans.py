@@ -127,16 +127,16 @@ if __name__ == '__main__':
     #clasificador.calcularMediaDesviacion(dataset.datos,dataset.nominalAtributos)
     #clasificador.normalizarDatos(dataset.datos,dataset.nominalAtributos)#TODO: normaliza es muy lento, hay que ver que está pasando. Además que si le pasas un porcentaje de la tabla no esta normalizando despues esos campos
     error = []
-    for i in range(10):
-        dataset = Datos('ConjuntosDatosP2/iris.csv')
-        km = KMeans(3)  
-        km.calcularMediaDesviacion(dataset.datos,dataset.nominalAtributos)
-        km.normalizarDatos(dataset.datos,dataset.nominalAtributos)
-        # print(type(dataset.datos))
-        km.fit(dataset.datos)
-        # print(km.clases)
-        # print(km.clusterAlQuePertenece)
-        # print(km.centroids)
-        print(f'{error.append(km.error(dataset.datos) * 100)}%')
-    
+   
+    dataset = Datos('ConjuntosDatosP2/iris.csv')
+    km = KMeans(3)  
+    km.calcularMediaDesviacion(dataset.datos,dataset.nominalAtributos)
+    km.normalizarDatos(dataset.datos,dataset.nominalAtributos)
+    # print(type(dataset.datos))
+    km.fit(dataset.datos)
+    # print(km.clases)
+    # print(km.clusterAlQuePertenece)
+    # print(km.centroids)
+    print(f'{km.error(dataset.datos) * 100}%')
+
 
