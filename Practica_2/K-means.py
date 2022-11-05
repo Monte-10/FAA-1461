@@ -31,7 +31,7 @@ def distance(list1,list2):
     
 
 class KMeans:
-    
+
     def __init__(self, n_clusters=4):
         self.K = n_clusters
         
@@ -41,7 +41,6 @@ class KMeans:
         datos[keys] = datos[keys].astype(float)
         #datosNumpy = datos[['SL','SW','PL','PW']].to_numpy() sin la clase
         datosNumpy = datos.to_numpy()
-        print(datosNumpy)
         self.centroids = datosNumpy[np.random.choice(len(datosNumpy), self.K, replace=False)]
         self.intial_centroids = self.centroids
         self.clase_anterior,  self.clusterAlQuePertenece = None, np.zeros(len(datosNumpy))
@@ -93,20 +92,51 @@ class KMeans:
                 error += 1
         return error/len(clases)
 
+    def calcularMediaDesviacion(self,datos,nominalAtributos):
+      lista = []
+      for elem in datos.values:
+          for i in elem:
+              if isfloat(i):
+                  lista.append(float(i))
+              else:
+                  lista.append(int(i))
+      self.mediaNormalizacion = np.mean(lista)
+      self.desviacionTipicaNormalizacion = np.std(lista)
+
+    #formula = (Xi - mu / desv)
+    def normalizarDatos(self,datos,nominalAtributos):
+        i = 0
+    
+
+        for elem in datos.keys():
+            if elem is not datos.keys()[-1]:
+                lista = []
+                if nominalAtributos[i] is False:
+                    for value in datos[elem]:
+                        if value not in lista:
+                            normalizado = (float(value) - self.mediaNormalizacion) / self.desviacionTipicaNormalizacion
+                            datos[elem] = datos[elem].replace([value],normalizado)
+                            lista.append(value)
+                i +=1
+
 
         
 if __name__ == '__main__':
 
-    dataset = Datos('ConjuntosDatosP2/iris.csv')
     #print(dataset.datos['Class'])
     #clasificador.calcularMediaDesviacion(dataset.datos,dataset.nominalAtributos)
     #clasificador.normalizarDatos(dataset.datos,dataset.nominalAtributos)#TODO: normaliza es muy lento, hay que ver que está pasando. Además que si le pasas un porcentaje de la tabla no esta normalizando despues esos campos
-    km = KMeans(1)  
-    # print(type(dataset.datos))
-    km.fit(dataset.datos)
-    # print(km.clases)
-    # print(km.clusterAlQuePertenece)
-    # print(km.centroids)
-    print(f'{km.error(dataset.datos) * 100}%')
-    # km.getCentroideMasCercano()
+    error = []
+    for i in range(10):
+        dataset = Datos('ConjuntosDatosP2/iris.csv')
+        km = KMeans(3)  
+        km.calcularMediaDesviacion(dataset.datos,dataset.nominalAtributos)
+        km.normalizarDatos(dataset.datos,dataset.nominalAtributos)
+        # print(type(dataset.datos))
+        km.fit(dataset.datos)
+        # print(km.clases)
+        # print(km.clusterAlQuePertenece)
+        # print(km.centroids)
+        print(f'{error.append(km.error(dataset.datos) * 100)}%')
+    
 
