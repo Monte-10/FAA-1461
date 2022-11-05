@@ -300,6 +300,7 @@ class ClasificadorKNN(Clasificador):
                   lista.append(float(i))
               else:
                   lista.append(int(i))
+      print(f'Vamos a calcular la media de la lista que contiene todo el dataset qu ehe recibido por parametro {lista}')
       self.mediaNormalizacion = np.mean(lista)
       self.desviacionTipicaNormalizacion = np.std(lista)
       
@@ -323,7 +324,22 @@ class ClasificadorKNN(Clasificador):
             lista.append(value)
         i +=1
     print(datos)   
-
+  
+  @staticmethod
+  def normalize(copy):
+    d = {}
+    for elem in copy.keys():
+      if elem != 'Class':
+        d[elem] = 'float64'
+    
+    df = copy.astype(d, copy = True)
+    
+    
+    df.iloc[:,0:-1] = df.iloc[:,0:-1].apply(lambda x: (x-x.mean())/ x.std(), axis=0)
+    
+    return df
+    
+    
 
   def entrenamiento(self,datosTotales, datosNormalizar, atributosNominal, atributosNominalNormalizar): #entrenamiento tiene que tener los mismos valores que la clase abstracta que implementa.
     self.calcularMediaDesviacion(datosNormalizar,atributosNominalNormalizar) 
