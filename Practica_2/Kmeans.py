@@ -48,14 +48,15 @@ class KMeans:
             self.clase_anterior = self.clusterAlQuePertenece
             self.clusterAlQuePertenece = self.getCentroideMasCercano(datosNumpy)
             self.recalculaCentroides(datosNumpy)
+            
         #TODO: el problema que tengo es que la hacerlo numpy, me esta haciendo operaciones sobre la clase, y me esta saliendo con decimales. Entonces no predice bien
         
     def getCentroideMasCercano(self, datosNumpy):
-        clases = np.apply_along_axis(self.compute_label, 1, datosNumpy) #aplica la funcion sobre cada eje del dataset. axis 1 significa operar por cada fila
+        clases = np.apply_along_axis(self.calculaObjetivo, 1, datosNumpy) #aplica la funcion sobre cada eje del dataset. axis 1 significa operar por cada fila
         #print(f'---- {clases} ----{len(clases)}\n')
         return clases
 
-    def compute_label(self, x):
+    def calculaObjetivo(self, x):
         argmin = np.argmin(np.sqrt(np.sum((self.centroids - x)**2, axis=1))) #selecciona el centroide al que menos distancia tiene cada fila
         return argmin #devuelve el centroide que esta a menos distancia respecto a los demas por cada fila
 
@@ -66,16 +67,26 @@ class KMeans:
             # print(f'----- datosNumpy[:-1]: {datosNumpy[self.clusterAlQuePertenece == k][:,:-1]}')
             # print(f'----- datosNumpy[:-1]: {datosNumpy[self.clusterAlQuePertenece == k][:-1].mean(axis=0)}')
             # print(f'{datosNumpy[self.clusterAlQuePertenece == k]}') #devuelve las posiciones de la tabla que pertenecen al cluster en cuestion
-             
-            array = np.array(np.mean(datosNumpy[self.clusterAlQuePertenece == k],axis=0))
-           
+            # print(f'tipo media -> {type(np.mean(datosNumpy[self.clusterAlQuePertenece == k,0:-1],axis=0))}')
+            # print(f'Media -> {np.mean(datosNumpy[self.clusterAlQuePertenece == k,0:-1],axis=0)}')
+            # print(f'Clase -> {datosNumpy[self.clusterAlQuePertenece == k,-1]}')
+
+            #otra idea seria meter en un numpy datosNumpy[self.clusterAlQuePertenece == k,0:-1], ordenarlo 
+            array = np.array(datosNumpy[self.clusterAlQuePertenece == k])
+
+            
+            array2 = np.sort(array,axis=0)
+        
+
+            #Si se puede utilizar un patron medio que no esté en el dataset haremos lo de a continuacion, ya que ofrece mejores resultados.
+            #array = np.array(np.mean(datosNumpy[self.clusterAlQuePertenece == k,0:-1],axis=0))
             #array2 = np.append(array,datosNumpy[self.clusterAlQuePertenece == k][:,-1])
             
             #array2 = np.array(array) #TODO: el nuevo centroide es la media(CENTRO DE MASAS) de cada cluster. Pero tiene que ser necesariamente un valor que estuviera previamente en el cluster. O puede ser otro nuevo
             
             
             
-            self.centroids[k] = array
+            self.centroids[k] = array2[math.floor(len(array2)/2)]
     
     def error(self,datos):
         keys = datos.keys().tolist()
@@ -86,6 +97,7 @@ class KMeans:
         clases = datos[keys[-1]]
         
         for i in range(len(clases)):
+            #print(f'clases[i]: {clases[i]} ===== classesToPredict[self.clusterAlQuePertenece[i]]: {classesToPredict[self.clusterAlQuePertenece[i]]}')
             if clases[i] == classesToPredict[self.clusterAlQuePertenece[i]]:
                 pass
             else:
@@ -126,17 +138,27 @@ if __name__ == '__main__':
     #print(dataset.datos['Class'])
     #clasificador.calcularMediaDesviacion(dataset.datos,dataset.nominalAtributos)
     #clasificador.normalizarDatos(dataset.datos,dataset.nominalAtributos)#TODO: normaliza es muy lento, hay que ver que está pasando. Además que si le pasas un porcentaje de la tabla no esta normalizando despues esos campos
-    error = []
    
     dataset = Datos('ConjuntosDatosP2/iris.csv')
-    km = KMeans(3)  
-    km.calcularMediaDesviacion(dataset.datos,dataset.nominalAtributos)
-    km.normalizarDatos(dataset.datos,dataset.nominalAtributos)
-    # print(type(dataset.datos))
-    km.fit(dataset.datos)
-    # print(km.clases)
-    # print(km.clusterAlQuePertenece)
-    # print(km.centroids)
-    print(f'{km.error(dataset.datos) * 100}%')
+    otro = ClasificadorKNN().normalize(dataset.datos)
+    dataset.datos = otro
+    error = []
+    for i in range(100):
+        
+
+        dataset = Datos('ConjuntosDatosP2/iris.csv')
+        km = KMeans(5)  
+        #km.calcularMediaDesviacion(dataset.datos,dataset.nominalAtributos)
+        #km.normalizarDatos(dataset.datos,dataset.nominalAtributos)
+        # print(type(dataset.datos))
+        km.fit(dataset.datos)
+        # print(km.clases)
+        error.append(km.error(dataset.datos) * 100)
+    
+    print(np.mean(error))
+    #print(km.clusterAlQuePertenece)
+    #print(km.centroids)
+    
+    #print(f'{km.error(dataset.datos) * 100} %')
 
 
