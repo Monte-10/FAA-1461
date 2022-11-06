@@ -1,8 +1,9 @@
 
 from Datos import Datos
 from Clasificador import *
+from ClasificadorKNN import *
 import EstrategiaParticionado as EstrategiaParticionado
-dataset = Datos('ConjuntosDatosP2/pima-indians-diabetes.csv')
+dataset = Datos('ConjuntosDatosP2/wdbc.csv')
 clasificador = ClasificadorKNN()
 
 validacionSimple = EstrategiaParticionado.ValidacionSimple(10,5)
@@ -30,8 +31,8 @@ print(f'Media de los errores sin normalizar: {np.mean(errores) * 100}%')
 
 
 
-otro = clasificador.normalize(dataset.datos)
-dataset.datos = otro
+dataset.datos = clasificador.entrenamiento(dataset.datos, dataset.nominalAtributos)
+
 
 # dataset = Datos('ConjuntosDatosP2/wdbc.csv')
 # clasificador = ClasificadorKNN()
