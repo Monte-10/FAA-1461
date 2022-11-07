@@ -24,8 +24,8 @@ class ClasificadorKNN(Clasificador):
     
 
   def entrenamiento(self,datosTotales, atributosNominal): #entrenamiento tiene que tener los mismos valores que la clase abstracta que implementa.
-    if normaliza is True:
-        return ClasificadorKNN.normalize(datosTotales)
+    
+    return ClasificadorKNN.normalize(datosTotales)
     
 
 

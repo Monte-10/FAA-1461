@@ -4,6 +4,7 @@ from Datos import *
 import random
 import math
 import pandas as pd
+from ClasificadorKNN import *
         
 def distance(list1,list2):
     """Distance between two vectors."""
@@ -62,31 +63,22 @@ class KMeans:
 
     def recalculaCentroides(self, datosNumpy): #los centroides se calculan para todo xi, calculamos un valor medio nuevo (que no esta en el excel. Y luego se ve cual se acerca más del excel) la clase tambien entra dentro de este calculo.
         for k in range(self.K):
-            # print(f'K --------->{k}')
-            # print(f'----- clusterAlQuePertenece: {self.clusterAlQuePertenece}')
-            # print(f'----- datosNumpy[:-1]: {datosNumpy[self.clusterAlQuePertenece == k][:,:-1]}')
-            # print(f'----- datosNumpy[:-1]: {datosNumpy[self.clusterAlQuePertenece == k][:-1].mean(axis=0)}')
-            # print(f'{datosNumpy[self.clusterAlQuePertenece == k]}') #devuelve las posiciones de la tabla que pertenecen al cluster en cuestion
-            # print(f'tipo media -> {type(np.mean(datosNumpy[self.clusterAlQuePertenece == k,0:-1],axis=0))}')
-            # print(f'Media -> {np.mean(datosNumpy[self.clusterAlQuePertenece == k,0:-1],axis=0)}')
-            # print(f'Clase -> {datosNumpy[self.clusterAlQuePertenece == k,-1]}')
-
+        
             #otra idea seria meter en un numpy datosNumpy[self.clusterAlQuePertenece == k,0:-1], ordenarlo 
-            array = np.array(datosNumpy[self.clusterAlQuePertenece == k])
+            #array = np.array(datosNumpy[self.clusterAlQuePertenece == k])
 
             
-            array2 = np.sort(array,axis=0)
+            #array2 = np.sort(array,axis=0)
         
 
             #Si se puede utilizar un patron medio que no esté en el dataset haremos lo de a continuacion, ya que ofrece mejores resultados.
-            #array = np.array(np.mean(datosNumpy[self.clusterAlQuePertenece == k,0:-1],axis=0))
-            #array2 = np.append(array,datosNumpy[self.clusterAlQuePertenece == k][:,-1])
-            
-            #array2 = np.array(array) #TODO: el nuevo centroide es la media(CENTRO DE MASAS) de cada cluster. Pero tiene que ser necesariamente un valor que estuviera previamente en el cluster. O puede ser otro nuevo
+            array = np.array(np.mean(datosNumpy[self.clusterAlQuePertenece == k,0:-1],axis=0))
+            array2 = np.append(array,round(np.mean(datosNumpy[self.clusterAlQuePertenece == k][:,-1])))
             
             
             
-            self.centroids[k] = array2[math.floor(len(array2)/2)]
+            #self.centroids[k] = array2[math.floor(len(array2)/2)]
+            self.centroids[k] = array2
     
     def error(self,datos):
         keys = datos.keys().tolist()
@@ -140,12 +132,11 @@ if __name__ == '__main__':
     #clasificador.normalizarDatos(dataset.datos,dataset.nominalAtributos)#TODO: normaliza es muy lento, hay que ver que está pasando. Además que si le pasas un porcentaje de la tabla no esta normalizando despues esos campos
    
     dataset = Datos('ConjuntosDatosP2/iris.csv')
-    otro = ClasificadorKNN().normalize(dataset.datos)
-    dataset.datos = otro
+    # otro = ClasificadorKNN().normalize(dataset.datos)
+    # dataset.datos = otro
     error = []
-    for i in range(100):
         
-
+    for i in range(100):
         dataset = Datos('ConjuntosDatosP2/iris.csv')
         km = KMeans(5)  
         #km.calcularMediaDesviacion(dataset.datos,dataset.nominalAtributos)
@@ -154,7 +145,7 @@ if __name__ == '__main__':
         km.fit(dataset.datos)
         # print(km.clases)
         error.append(km.error(dataset.datos) * 100)
-    
+        
     print(np.mean(error))
     #print(km.clusterAlQuePertenece)
     #print(km.centroids)
