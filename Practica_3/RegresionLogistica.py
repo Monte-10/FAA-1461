@@ -28,11 +28,12 @@ class RegresionLogistica(Clasificador):
 
     def entrenamiento(self,gradiente,num_epocas, datosTrain, nominalAtributos, diccionario):
         w = self.getVectorAleatorio(nominalAtributos)
+        #print(f'w ---- {w}')
         n = gradiente
         n_epocas = num_epocas
         datos = datosTrain.iloc[:,:-1].to_numpy().astype('float64') #aunque parezcan raros, los esta cambiando bien.
         clases = datosTrain.iloc[:,-1].to_numpy().astype('int64')
-        
+        clases[clases != 1] = 0
         e = 0
         while(e < n_epocas):
             contador = 0
@@ -42,7 +43,7 @@ class RegresionLogistica(Clasificador):
                 #print(f'w producto escalar xj {w} {xj} = {a}')
                 
                 posteriori = self.sig(a)
-                
+                #print(f"posteriori = {posteriori}")
                 #print(f'posteriori de {a} =  {posteriori}')
                 #print(f'La clase que equivale a esta fila del numpy es: {clases[contador]}')
                 w = w - n*(posteriori - clases[contador])*xj
@@ -51,6 +52,7 @@ class RegresionLogistica(Clasificador):
                 #una vez consiga parsear los datos a float, obtener w * xj
                 contador += 1
                 
+            
             
             e+=1
         #para cada elemento de datosTrain
@@ -63,10 +65,12 @@ class RegresionLogistica(Clasificador):
     def clasificacion(self,w,datosTest):
         datos = datosTest.iloc[:,:-1].to_numpy().astype('float64')
         clases = datosTest.iloc[:,-1].to_numpy().astype('int64')
+        clases[clases != 1] = 0
+
         clasesSolucion = []
         for xj in datos:
             xj = np.append(1, xj)
-            #print(f'Xj: {xj}')
+            #print(f'Xj: {xj} w:{w}')
             a = np.dot(w,xj)
             #print(f'\n\nPor lo tanto a es: {a}')
             if a > 0:
@@ -75,9 +79,13 @@ class RegresionLogistica(Clasificador):
                 clasesSolucion.append(0)
 
         clasificador = np.array(clasesSolucion)
-
+        
+        #print(clasificador)
         error = 0
+
+
         for i in range(len(clasificador)):
+            #print(f'prediccion: {clasificador[i]} clase: {clases[i]}')
             if clasificador[i] == clases[i]:
                 pass
             else:
@@ -97,14 +105,13 @@ if __name__ == '__main__':
     n_epocas = 10
     gradiente = 1
     errores = []
-    #dataset.datos = ClasificadorKNN().normalize(dataset.datos)
+    # dataset.datos = ClasificadorKNN().normalize(dataset.datos)
     for j in range(50):
         validacionSimple = EstrategiaParticionado.ValidacionSimple(25,5)
         validacionSimple.creaParticiones(dataset.datos)
         for i in range(5): 
 
             datosTrain = dataset.extraeDatos(validacionSimple.particiones[i].indicesTrain)
-            
             datosTest = dataset.extraeDatos(validacionSimple.particiones[i].indicesTest) 
             w = rl.entrenamiento(gradiente,n_epocas,datosTrain,dataset.nominalAtributos,dataset.diccionario)
             #print(f'W------------------------------------------------------{w}')
