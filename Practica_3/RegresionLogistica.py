@@ -100,12 +100,37 @@ class RegresionLogistica(Clasificador):
 
     
 if __name__ == '__main__':
+    dataset = Datos('ConjuntosDatosP2/pima-indians-diabetes.csv')
+    rl = RegresionLogistica()
+    n_epocas = 10
+    gradiente = 1
+    errores = []
+
+    #Si queremos normalizar:
+    #dataset.datos = ClasificadorKNN().normalize(dataset.datos)
+
+    for j in range(50):
+        validacionSimple = EstrategiaParticionado.ValidacionSimple(25,5)
+        validacionSimple.creaParticiones(dataset.datos)
+        for i in range(5): 
+
+            datosTrain = dataset.extraeDatos(validacionSimple.particiones[i].indicesTrain)
+            datosTest = dataset.extraeDatos(validacionSimple.particiones[i].indicesTest) 
+            w = rl.entrenamiento(gradiente,n_epocas,datosTrain,dataset.nominalAtributos,dataset.diccionario)
+            #print(f'W------------------------------------------------------{w}')
+            error = rl.clasificacion(w,datosTest)
+            errores.append(error/len(datosTest))
+    print(f'El error para pima es: {np.mean(errores)}')
+
     dataset = Datos('ConjuntosDatosP2/wdbc.csv')
     rl = RegresionLogistica()
     n_epocas = 10
     gradiente = 1
     errores = []
-    # dataset.datos = ClasificadorKNN().normalize(dataset.datos)
+
+    #Si queremos normalizar:
+    #dataset.datos = ClasificadorKNN().normalize(dataset.datos)
+    
     for j in range(50):
         validacionSimple = EstrategiaParticionado.ValidacionSimple(25,5)
         validacionSimple.creaParticiones(dataset.datos)
@@ -118,4 +143,4 @@ if __name__ == '__main__':
             error = rl.clasificacion(w,datosTest)
             errores.append(error/len(datosTest))
     print(np.mean(errores))
-    
+    print(f'El error para wdbc es: {np.mean(errores)}')
