@@ -137,6 +137,28 @@ class RegresionLogistica(Clasificador):
         #TODO: ¿Que hace que una clase sea C1 o C2. Como digo que C1 es 1 y C2 es 0?
         #TODO: ¿Al hacer el np.dot(w,xj) w no debe ser (wo,w) y xj (x0,xj)?
 
+    def dameError(self,dataset,n_epocas,gradiente, normaliza):
+        errores = []
+        
+        if normaliza is True:
+            dataset.datos = Datos.normalize(dataset.datos)
+
+        
+        for j in range(50):
+            validacionSimple = EstrategiaParticionado.ValidacionSimple(25,5)
+            validacionSimple.creaParticiones(dataset.datos)
+            for i in range(5): 
+
+                datosTrain = dataset.extraeDatos(validacionSimple.particiones[i].indicesTrain)
+                datosTest = dataset.extraeDatos(validacionSimple.particiones[i].indicesTest) 
+                w = self.entrenamiento(gradiente,n_epocas,datosTrain,dataset.nominalAtributos,dataset.diccionario)
+                #print(f'W------------------------------------------------------{w}')
+                error = self.clasificacion(w,datosTest)
+                errores.append(error/len(datosTest))
+            
+        
+        return (np.mean(errores) * 100)
+            
 
     
 
@@ -150,7 +172,7 @@ if __name__ == '__main__':
 
     # Si queremos normalizar:
     # dataset.datos = ClasificadorKNN().normalize(dataset.datos)
-
+    error = dameError(dataset,rl,n_epocas,gradiente,False)
     for j in range(50):
         validacionSimple = EstrategiaParticionado.ValidacionSimple(25,5)
         validacionSimple.creaParticiones(dataset.datos)

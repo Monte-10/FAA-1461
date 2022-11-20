@@ -18,11 +18,26 @@ class Datos:
         csvReader = csv.reader(file)          
         self.getOrderedDict(csvReader)
 
-        
+     
+    @staticmethod
+    def normalize(copy):
+        d = {}
+        for elem in copy.keys():
+            if elem != 'Class':
+                d[elem] = 'float64'
+
+        df = copy.astype(d, copy = True)
+
+
+        df.iloc[:,0:-1] = df.iloc[:,0:-1].apply(lambda x: (x-x.mean())/ x.std(), axis=0)
+
+        return df
+   
     def getHeaders(self,csvReader):
         headers = next(csvReader)    
         return headers
-        
+    
+    
             
 
     def getOrderedDict(self,csvReader):

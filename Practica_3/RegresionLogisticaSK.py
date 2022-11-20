@@ -11,7 +11,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
 
-def getErroresLogisticRegresion():
+def getErroresLogisticRegresion(nombreFichero):
     dataset1 = pd.read_csv('ConjuntosDatosP2/pima-indians-diabetes.csv')
     X = dataset1[['Pregs','Plas','Pres','Skin','Test','Mass','Pedi','Age']].values
     y = dataset1[['Class']].values.ravel()
@@ -31,6 +31,7 @@ def getErroresLogisticRegresion():
     
     print(f'El error para pima es: {1-score}')
     print(f'El error para wdbc es: {1- score2}')
+    return score, score2
 
 
 def getErroresSGDClassifier(normaliza):
