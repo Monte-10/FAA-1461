@@ -6,170 +6,46 @@ import EstrategiaParticionado as ep
 import RegresionLogistica as rl
 import numpy as np
 
-# Crea una matriz de confusion para el clasificador Naive Bayes
-def matrizConfusionNB(datos, particionado, clasificador, seed=None):
-    # Creamos la matriz de confusion
-    matriz = np.zeros((len(datos.diccionario['Class']), len(datos.diccionario['Class'])), dtype=int)
-    # Creamos las particiones siguiendo la estrategia
-    particiones = particionado.creaParticiones(datos.datos, seed)
-    # Para cada particion
-    for particion in particiones:
-        # Entrenamos el clasificador
-        clasificador.entrenamiento(datos.extraeDatos(particion.indicesTrain), datos.nominalAtributos, datos.diccionario)
-        # Obtenemos las predicciones
-        predicciones = clasificador.clasifica(datos.extraeDatos(particion.indicesTest), datos.nominalAtributos, datos.diccionario)
-        # Para cada prediccion
-        for i in range(len(predicciones)):
-            # Aumentamos en uno el valor de la matriz de confusion
-            matriz[datos.diccionario['Class'][predicciones[i]]][datos.diccionario['Class'][datos.extraeDatos(particion.indicesTest)[i][-1]]] += 1
-    # Devolvemos la matriz de confusion
-    return matriz
+# Creamos una matriz de confusion usando la estrategia de validacion simple y el clasificador Naive Bayes
 
-# Imprime la matriz de confusion para el clasificador Naive Bayes
-def imprimeMatrizConfusionNB(datos, particionado, clasificador, seed=None):
-    # Obtenemos la matriz de confusion
-    matriz = matrizConfusionNB(datos, particionado, clasificador, seed)
-    # Imprimimos la matriz de confusion
-    print("Matriz de confusion para el clasificador Naive Bayes")
-    print("--------------------------------------------------")
-    print("Clases: ", datos.diccionario['Class'])
-    print("--------------------------------------------------")
-    print(matriz)
-    print("--------------------------------------------------")
 
-# Imprime TPR, FNR, TNR, FPS para el clasificador Naive Bayes
-def imprimeMetricasNB(matriz):
-    # Obtenemos los valores de la matriz de confusion
-    TP = matriz[0][0]
-    FN = matriz[0][1]
-    FP = matriz[1][0]
-    TN = matriz[1][1]
-    # Calculamos las metricas
-    TPR = TP / (TP + FN)
-    FNR = FN / (TP + FN)
-    TNR = TN / (TN + FP)
-    FPR = FP / (TN + FP)
-    # Imprimimos las metricas
-    print("Metricas para el clasificador Naive Bayes")
-    print("--------------------------------------------------")
-    print("TPR: ", TPR)
-    print("FNR: ", FNR)
-    print("TNR: ", TNR)
-    print("FPR: ", FPR)
-    print("--------------------------------------------------")
-    
-data = Datos('ConjuntoDatosP3/wdbc.csv')
-particion = ep.ValidacionSimple(0.7,5)
-clasificanb = nb.ClasificadorNaiveBayes()
+def matrizConfusionKNN(dataset):
+    kNN = knn.ClasificadorKNN()
+    matrizConfusion = np.zeros((2,2))
+    validacionSimple = ep.ValidacionSimple(25,5)
+    validacionSimple.creaParticiones(dataset.datos)
+    for i in range(5):
+        datosTrain = dataset.extraeDatos(validacionSimple.particiones[i].indicesTrain)
+        datosTest = dataset.extraeDatos(validacionSimple.particiones[i].indicesTest)
+        # kNN.entrenamiento(datosTrain,dataset.nominalAtributos)
+        predicciones = kNN.clasifica(datosTest,datosTrain,dataset.nominalAtributos,5)
+        clases = datosTest.iloc[:,-1].to_numpy().astype('int64')
+        tp = 0
+        tn = 0
+        fp = 0
+        fn = 0
+        counter = 0
+        for elem in clases:
+            # print(f'{type(elem)}  ============== {type(prediccion[counter])}')
+            # print(f'real: {elem}  ============== pred: {prediccion[counter]}')
+            # print(type(elem),type(predicciones[counter]))
+            if elem == int(predicciones[counter]):
+                if elem == 1:
+                    # print("tp + 1\n")
+                    tp += 1
+                else:
+                    # print("tn + 1\n")
+                    tn += 1
+            else:
+                if elem == 1:
+                    # print("fn + 1\n")
+                    fn += 1 
+                else:
+                    # print("fp + 1\n")
+                    fp += 1
+            counter += 1
 
-# Crear una matriz de confusion para el clasificador KNN
-def matrizConfusionKNN(datos, particionado, clasificador, seed=None):
-    # Creamos la matriz de confusion
-    matriz = np.zeros((len(datos.diccionario['Class']), len(datos.diccionario['Class'])), dtype=int)
-    # Creamos las particiones siguiendo la estrategia
-    particiones = particionado.creaParticiones(datos.datos, seed)
-    # Para cada particion
-    for particion in particiones:
-        # Entrenamos el clasificador
-        clasificador.entrenamiento(datos.extraeDatos(particion.indicesTrain), datos.nominalAtributos, datos.diccionario)
-        # Obtenemos las predicciones
-        predicciones = clasificador.clasifica(datos.extraeDatos(particion.indicesTest), datos.nominalAtributos, datos.diccionario)
-        # Para cada prediccion
-        for i in range(len(predicciones)):
-            # Aumentamos en uno el valor de la matriz de confusion
-            matriz[datos.diccionario['Class'][predicciones[i]]][datos.diccionario['Class'][datos.extraeDatos(particion.indicesTest)[i][-1]]] += 1
-    # Devolvemos la matriz de confusion
-    return matriz
+    print(tp,tn,fn,fp)
+    return matrizConfusion
 
-# Imprime la matriz de confusion para el clasificador KNN
-def imprimeMatrizConfusionKNN(datos, particionado, clasificador, seed=None):
-    # Obtenemos la matriz de confusion
-    matriz = matrizConfusionKNN(datos, particionado, clasificador, seed)
-    # Imprimimos la matriz de confusion
-    print("Matriz de confusion para el clasificador KNN")
-    print("--------------------------------------------------")
-    print("Clases: ", datos.diccionario['Class'])
-    print("--------------------------------------------------")
-    print(matriz)
-    print("--------------------------------------------------")
-    
-# Imprime TPR, FNR, TNR, FPS para el clasificador KNN
-def imprimeMetricasKNN(matriz):
-    # Obtenemos los valores de la matriz de confusion
-    TP = matriz[0][0]
-    FN = matriz[0][1]
-    FP = matriz[1][0]
-    TN = matriz[1][1]
-    # Calculamos las metricas
-    TPR = TP / (TP + FN)
-    FNR = FN / (TP + FN)
-    TNR = TN / (TN + FP)
-    FPR = FP / (TN + FP)
-    # Imprimimos las metricas
-    print("Metricas para el clasificador KNN")
-    print("--------------------------------------------------")
-    print("TPR: ", TPR)
-    print("FNR: ", FNR)
-    print("TNR: ", TNR)
-    print("FPR: ", FPR)
-    print("--------------------------------------------------")
-    
-data = Datos('ConjuntoDatosP3/wdbc.csv')
-particion = ep.ValidacionSimple(0.7,5)
-clasificaknn = knn.ClasificadorVecinosProximos(5)
-
-# Crear una matriz de confusion para el clasificador KMeans
-def matrizConfusionKMeans(datos, particionado, clasificador, seed=None):
-    # Creamos la matriz de confusion
-    matriz = np.zeros((len(datos.diccionario['Class']), len(datos.diccionario['Class'])), dtype=int)
-    # Creamos las particiones siguiendo la estrategia
-    particiones = particionado.creaParticiones(datos.datos, seed)
-    # Para cada particion
-    for particion in particiones:
-        # Entrenamos el clasificador
-        clasificador.entrenamiento(datos.extraeDatos(particion.indicesTrain), datos.nominalAtributos, datos.diccionario)
-        # Obtenemos las predicciones
-        predicciones = clasificador.clasifica(datos.extraeDatos(particion.indicesTest), datos.nominalAtributos, datos.diccionario)
-        # Para cada prediccion
-        for i in range(len(predicciones)):
-            # Aumentamos en uno el valor de la matriz de confusion
-            matriz[datos.diccionario['Class'][predicciones[i]]][datos.diccionario['Class'][datos.extraeDatos(particion.indicesTest)[i][-1]]] += 1
-    # Devolvemos la matriz de confusion
-    return matriz
-
-# Imprime la matriz de confusion para el clasificador KMeans
-def imprimeMatrizConfusionKMeans(datos, particionado, clasificador, seed=None):
-    # Obtenemos la matriz de confusion
-    matriz = matrizConfusionKMeans(datos, particionado, clasificador, seed)
-    # Imprimimos la matriz de confusion
-    print("Matriz de confusion para el clasificador KMeans")
-    print("--------------------------------------------------")
-    print("Clases: ", datos.diccionario['Class'])
-    print("--------------------------------------------------")
-    print(matriz)
-    print("--------------------------------------------------")
-    
-# Imprime TPR, FNR, TNR, FPS para el clasificador KMeans
-def imprimeMetricasKMeans(matriz):
-    # Obtenemos los valores de la matriz de confusion
-    TP = matriz[0][0]
-    FN = matriz[0][1]
-    FP = matriz[1][0]
-    TN = matriz[1][1]
-    # Calculamos las metricas
-    TPR = TP / (TP + FN)
-    FNR = FN / (TP + FN)
-    TNR = TN / (TN + FP)
-    FPR = FP / (TN + FP)
-    # Imprimimos las metricas
-    print("Metricas para el clasificador KMeans")
-    print("--------------------------------------------------")
-    print("TPR: ", TPR)
-    print("FNR: ", FNR)
-    print("TNR: ", TNR)
-    print("FPR: ", FPR)
-    print("--------------------------------------------------")
-    
-data = Datos('ConjuntoDatosP3/wdbc.csv')
-particion = ep.ValidacionSimple(0.7,5)
-clasificakmeans = kmeans.KMeans(2)
+matriz = matrizConfusionKNN(Datos('/mnt/c/Users/alexm/Documents/FAA-1461/Practica_3/ConjuntosDatosP2/pima-indians-diabetes.csv'))

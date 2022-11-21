@@ -1,5 +1,4 @@
 from abc import ABCMeta,abstractmethod
-from timeit import repeat
 from xmlrpc.client import boolean
 
 from zmq import THREAD_AFFINITY_CPU_REMOVE
@@ -7,13 +6,10 @@ import numpy as np
 import math
 import operator
 import EstrategiaParticionado
-from Datos import *
 from functools import reduce
 from scipy.stats import norm
-from scipy.spatial.distance import euclidean
-import scipy
 import statistics
-import collections
+
 class Clasificador:
   
   # Clase abstracta
@@ -48,10 +44,11 @@ class Clasificador:
   def error(self,datos,pred):
     err = 0
     for i in range(datos.shape[0] - 1 ): #numero de elementos de cada atributo
-      #print(f'¿{datos[datos.keys()].values[i]} != {pred[i]}?')
+      print(datos[datos.keys()[-1]].values[i] ,pred[i])
       if datos[datos.keys()[-1]].values[i] != pred[i]:
+        print("---------------------ERROR")
         err += 1
-      
+    
       # if datos['Class'][i] != pred[i]:
       #   err += 1
     #print("Total error:" + str(err) + "total datos: " + str(datos.shape[0]))
@@ -76,20 +73,23 @@ class Clasificador:
       clasificador.entrenamiento(datosTrain, dataset.nominalAtributos,laPlace, dataset.diccionario)
       #realizamos las predicciones y calculamos el error de cada particion.
       predicciones = clasificador.clasifica(datosTest, dataset.nominalAtributos, dataset.diccionario)
-      
+      print(predicciones)
+      self.score(datosTest,predicciones)
       errores.append(self.error(datosTest, predicciones))
     #print(statistics.mean(errores))
-    return errores                                           
+    return errores                                                    
     
     
  
 class ClasificadorNaiveBayes(Clasificador): 
     dicc_atrib = {}
     dicc_clas = {}
-    
+            
+
     
     def __init__(self) :
       super().__init__()
+      self.matrizConfusion = np.empty((2,2)) #¿asumo que los valores de clase siempre van a ser 0 y 1? De momento si. Inicializo con tam de matrix 2x2
 
     def entrenamiento(self,datosTrain ,nominalAtributos, laplace : boolean, datos):
       """Entrenamiento"""
@@ -103,9 +103,7 @@ class ClasificadorNaiveBayes(Clasificador):
       ##print("Prioris: " + str(self.prioris))
       
       clases = np.unique(datosTrain[datosTrain.keys()[-1]])
-      ##print(f"Clases -> {clases}")
       self.tablaSolucion = [] #contiene todas una lista por cada atributo con el nnumero de aparicioines de la clase por cada valor del atributo
-      ##print(f"nominalAtributos -> {nominalAtributos}")
       counter = 0
       for key,values in datos.items():
         #para no coger la clase
@@ -115,7 +113,7 @@ class ClasificadorNaiveBayes(Clasificador):
           #print("Creo tabla")
           tabla = np.zeros((len(values),len(clases)))
           for index,row in datosTrain.iterrows():
-            tabla[int(row[counter])-1,int(row[-1])-1] += 1
+            tabla[int(round((row[counter])))-1,int(round(row[-1]))-1] += 1
 
           if laplace is True:
             tabla += 1
@@ -130,7 +128,8 @@ class ClasificadorNaiveBayes(Clasificador):
             lista = []
             for index,row in datosTrain.iterrows():
               if(row[-1] == clase):
-                lista.append(int(row[counter]))
+                
+                lista.append(float((row[counter])))
             
             media = np.mean(lista)
             varianza = np.var(lista)
@@ -169,7 +168,7 @@ class ClasificadorNaiveBayes(Clasificador):
               prod *= self.tablaSolucion[j][int(fila[j])-1][contClases] / ejsClase 
             else:
               op1 = (1/(math.sqrt(2*math.pi*self.tablaSolucion[j][1][contClases])))
-              op2 = math.exp((-((int(fila[j]))-self.tablaSolucion[j][0][contClases]))/(2*self.tablaSolucion[j][1][contClases]))
+              op2 = math.exp((-(float(fila[j]))-self.tablaSolucion[j][0][contClases]))/(2*self.tablaSolucion[j][1][contClases])
               
               prod *= op1*op2
 
@@ -178,18 +177,16 @@ class ClasificadorNaiveBayes(Clasificador):
           contClases += 1
         
         pred.append(max(prodHi, key=prodHi.get)) #seleccionamos el maximo de cada producto de hi
-      
       return pred
     
     def getPrioris(self, datosTrain, nominalAtributo, laplace):
       diccionario = {}
+      
       for elem in datosTrain:
         if diccionario.__contains__(elem):
           diccionario[elem] += 1
         else:
           diccionario[elem] = 1
-
-      diccionario = collections.OrderedDict(sorted(diccionario.items()))
 
       total = len(datosTrain)
       diccionarioSolucion = {}
@@ -198,91 +195,49 @@ class ClasificadorNaiveBayes(Clasificador):
     
       return diccionarioSolucion,diccionario
     
-      
-    '''
-    Sera invocada de forma iterativa, por cada columna. 
-    De esta forma, calculara para cada valor que se encuentre la probabilidad condicionada por cada valor en el diccionario de prioris. 
-    Es decir p(A1=1 | C=1), p(A1=2 | C=1), p(A1=1 | C=2) , p(A1=2 | C=2) y todas posibles combinaciones
+    def score(self,datosTest,prediccion):
+        clases = datosTest.iloc[:,-1].to_numpy().astype('int64')
+        tp = 0
+        tn = 0
+        fp = 0
+        fn = 0
+        counter = 0
+        for elem in clases:
+            # print(f'{type(elem)}  ============== {type(prediccion[counter])}')
+            # print(f'real: {elem}  ============== pred: {prediccion[counter]}')
+            if elem == prediccion[counter]:
+                if elem == 1:
+                    # print("tp + 1\n")
+                    tp += 1
+                else:
+                    # print("tn + 1\n")
+                    tn += 1
+            else:
+                if elem == 1:
+                    # print("fn + 1\n")
+                    fn += 1 
+                else:
+                    # print("fp + 1\n")
+                    fp += 1
+            counter += 1
 
-    clase -> lista con todas las filas de la columna clase.
-    conteoClase -> numeroApariciones para cada valor de la clase
-    '''
-    def getProbabilidadesCondicionadas(self, prioris, datosTrain, nominalAtributo,clase,conteoClase,laplace): 
+        self.matrizConfusion[0][0] = int(tp)
+        self.matrizConfusion[0][1] = int(fp)
+        self.matrizConfusion[1][0] = int(fn)
+        self.matrizConfusion[1][1] = int(tn)
 
-      valoresClase = []
-      miLista = []
-      for valor in clase:
-        miLista.append(valor)
-        if not valoresClase.__contains__(valor):
-          valoresClase.append(valor)
-        
-      #diccionarioFinal -> {atr = 0:{clase = 1:}, atr = 1{clase = 1:,clase = 2:,clase = 3:}}
-      if(nominalAtributo is True):
-        diccionarioSolucion = {}
-        i = 0
-        for elem in datosTrain: #diccionario con el conteo de todos los valores de la columna          
-          if diccionarioSolucion.__contains__(elem) and diccionarioSolucion[elem].__contains__(miLista[i]):            
-            diccionarioSolucion[elem][miLista[i]] += 1
-          else:
-            if diccionarioSolucion.__contains__(elem):
-              diccionarioSolucion[elem][miLista[i]]= 1
-            else:   
-              diccionarioSolucion[elem] = {}
-              diccionarioSolucion[elem][miLista[i]] = 1 
-        
-          i += 1
-        
+        self.TPR = tp / (tp+fn)
+        self.FNR = fn / (tp+fn)
+        self.FPR = fp / (fp+tn)
+        self.TNR = tn / (fp+tn)
 
-        '''CORRECION DE LAPACE'''
-        if(laplace is True):  
-          ##print("Correccion de laplace")
-          for elem in diccionarioSolucion.keys():
-            for clase in diccionarioSolucion[elem].keys():
-              diccionarioSolucion[elem][clase] += 1
-          for elem in conteoClase.keys():
-            conteoClase[elem] += 1
-        '''----------------------'''
-        diccionarioFinal = {}
+def dist_normal(m,v,n):
+      if (v == 0):
+        v += math.pow(10, -6)
 
-        for elem in diccionarioSolucion.keys():
-          diccionarioFinal[elem] = {}
-          for clase in diccionarioSolucion[elem].keys():
-            diccionarioFinal[elem][clase] = diccionarioSolucion[elem][clase] / conteoClase[clase] 
-          
-        i = 0
-        return diccionarioFinal
-      else:
-        miDict = {}
-        for e in clase:
-          ##print(e.index[0])
-          if miDict.__contains__(e):            
-            miDict[e].append(int(datosTrain[clase.index[0]]))
-          else:
-            miDict[e] = []
-            miDict[e].append(int(datosTrain[clase.index[0]]))
+      exp = -(math.pow((n-m), 2)/(2*v))
+      base = 1/math.sqrt(2*math.pi*v)
+      densidad = base*math.pow(math.e,exp)
+      return densidad
 
-        '''{clase=N : [1,4,2,...,N]}'''
-        diccionarioSolucion = {}
-        for elem in miDict.keys():
-          lista = miDict[elem]
-          '''media'''
-          mean = sum(lista) / len(lista)
-          var = sum((l-mean)**2 for l in lista) / len(lista)
-          '''desviacion estandar'''
-          st_dev = math.sqrt(var)          
-          diccionarioSolucion[elem] = (mean,st_dev)
-        return diccionarioSolucion
-        '''{clase = 1: (media,desviacion tipica),clase = 2: (media,desviacion tipica)}'''
-        '''calcular media y desviacion tipica para cada valor de la clase '''
-       
-        media = datosTrain.mean()
-        #varianza = datosTrain.std(ddof=0)
-        varianza = 0
-        ##print(media)
-        return (media,varianza)
-
-
-
-
-      pass
-
+ 

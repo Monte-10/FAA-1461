@@ -164,7 +164,7 @@ class RegresionLogistica(Clasificador):
 
     
 if __name__ == '__main__':
-    dataset = Datos('ConjuntosDatosP2/pima-indians-diabetes.csv')
+    dataset = Datos('/mnt/c/Users/alexm/Documents/FAA-1461/Practica_3/ConjuntosDatosP2/pima-indians-diabetes.csv')
     rl = RegresionLogistica()
     n_epocas = 10
     gradiente = 1
@@ -172,7 +172,7 @@ if __name__ == '__main__':
 
     # Si queremos normalizar:
     # dataset.datos = ClasificadorKNN().normalize(dataset.datos)
-    error = dameError(dataset,rl,n_epocas,gradiente,False)
+    error = rl.dameError(dataset,n_epocas,gradiente,False)
     for j in range(50):
         validacionSimple = EstrategiaParticionado.ValidacionSimple(25,5)
         validacionSimple.creaParticiones(dataset.datos)
