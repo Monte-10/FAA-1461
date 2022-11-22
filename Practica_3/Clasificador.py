@@ -44,7 +44,10 @@ class Clasificador:
   def error(self,datos,pred):
     err = 0
     for i in range(datos.shape[0] - 1 ): #numero de elementos de cada atributo
+<<<<<<< HEAD
       print(datos[datos.keys()[-1]].values[i] ,pred[i])
+=======
+>>>>>>> 1db6776 (arreglado valores matriz)
       if datos[datos.keys()[-1]].values[i] != pred[i]:
         print("---------------------ERROR")
         err += 1
@@ -74,7 +77,10 @@ class Clasificador:
       #realizamos las predicciones y calculamos el error de cada particion.
       predicciones = clasificador.clasifica(datosTest, dataset.nominalAtributos, dataset.diccionario)
       print(predicciones)
+<<<<<<< HEAD
       self.score(datosTest,predicciones)
+=======
+>>>>>>> 1db6776 (arreglado valores matriz)
       errores.append(self.error(datosTest, predicciones))
     #print(statistics.mean(errores))
     return errores                                                    
@@ -113,7 +119,11 @@ class ClasificadorNaiveBayes(Clasificador):
           #print("Creo tabla")
           tabla = np.zeros((len(values),len(clases)))
           for index,row in datosTrain.iterrows():
+<<<<<<< HEAD
             tabla[int(round((row[counter])))-1,int(round(row[-1]))-1] += 1
+=======
+            tabla[int(round(row[counter]))-1,int(round(row[-1]))-1] += 1
+>>>>>>> 1db6776 (arreglado valores matriz)
 
           if laplace is True:
             tabla += 1
@@ -128,8 +138,12 @@ class ClasificadorNaiveBayes(Clasificador):
             lista = []
             for index,row in datosTrain.iterrows():
               if(row[-1] == clase):
+<<<<<<< HEAD
                 
                 lista.append(float((row[counter])))
+=======
+                lista.append(float(row[counter]))
+>>>>>>> 1db6776 (arreglado valores matriz)
             
             media = np.mean(lista)
             varianza = np.var(lista)
@@ -168,7 +182,11 @@ class ClasificadorNaiveBayes(Clasificador):
               prod *= self.tablaSolucion[j][int(fila[j])-1][contClases] / ejsClase 
             else:
               op1 = (1/(math.sqrt(2*math.pi*self.tablaSolucion[j][1][contClases])))
+<<<<<<< HEAD
               op2 = math.exp((-(float(fila[j]))-self.tablaSolucion[j][0][contClases]))/(2*self.tablaSolucion[j][1][contClases])
+=======
+              op2 = math.exp((-((float(fila[j]))-self.tablaSolucion[j][0][contClases]))/(2*self.tablaSolucion[j][1][contClases]))
+>>>>>>> 1db6776 (arreglado valores matriz)
               
               prod *= op1*op2
 
@@ -240,4 +258,16 @@ def dist_normal(m,v,n):
       densidad = base*math.pow(math.e,exp)
       return densidad
 
+<<<<<<< HEAD
+=======
+def dist_normal(m,v,n):
+      if (v == 0):
+        v += math.pow(10, -6)
+
+      exp = -(math.pow((n-m), 2)/(2*v))
+      base = 1/math.sqrt(2*math.pi*v)
+      densidad = base*math.pow(math.e,exp)
+      return densidad
+
+>>>>>>> 1db6776 (arreglado valores matriz)
  
