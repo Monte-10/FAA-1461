@@ -1,10 +1,11 @@
 from Clasificador import Clasificador
-
+import numpy as np
 class ClasificadorKNN(Clasificador):
 
 
   def __init__(self) -> None:
     super().__init__()
+    self.matrizConfusion = np.empty((2,2)) #¿asumo que los valores de clase siempre van a ser 0 y 1? De momento si. Inicializo con tam de matrix 2x2
   #Se eligen estos metodos aqui porque(y además porque forma parte del entrenamiento de k-nn) para cumplir con la estructura de metodo que se nos da en el enunciado, es necesario itener variables de instancia que ugarden el valor de la desviacion tipica y la media para la normalizacion de los datos por lo tanto tendrá que ir dentro de cada objeto clasificador vecinos, yo creo que debería ser en datos porque -> porque todas las operaciones que se realicen sobre los datos, deben estar encapsuladas aqui. De tal forma que puedas operar sobre un dataset sin tener que involucrar a otras clases para reducir dependencias
   
   @staticmethod
@@ -84,9 +85,46 @@ class ClasificadorKNN(Clasificador):
     # print(f'clases solucion {listaClases}')
     self.clasesPredichas = listaClases
     #print(f'{listaClases} es la lista que contiene la clase más predicha. Supuestamente deberia estar ordenada por el mismo orden que indices Test. De tal forma que la posicion 0 de esta lista equivale al primer indice de indicestest ')
+    self.score(datosTest,listaClases)
     return listaClases
 
-  
+  def score(self,datosTest,prediccion):
+    clases = datosTest.iloc[:,-1].to_numpy().astype('int64')
+    tp = 0
+    tn = 0
+    fp = 0
+    fn = 0
+    counter = 0
+    for elem in clases:
+        # print(f'{type(elem)}  ============== {type(prediccion[counter])}')
+        # print(f'real: {elem}  ============== pred: {prediccion[counter]}')
+        # print(type(elem),type(predicciones[counter]))
+        if elem == int(prediccion[counter]):
+            if elem == 1:
+                # print("tp + 1\n")
+                tp += 1
+            else:
+                # print("tn + 1\n")
+                tn += 1
+        else:
+            if elem == 1:
+                # print("fn + 1\n")
+                fn += 1 
+            else:
+                # print("fp + 1\n")
+                fp += 1
+        counter += 1
+
+    self.matrizConfusion[0][0] = int(tp)
+    self.matrizConfusion[0][1] = int(fp)
+    self.matrizConfusion[1][0] = int(fn)
+    self.matrizConfusion[1][1] = int(tn)
+
+    self.TPR = tp / (tp+fn)
+    self.FNR = fn / (tp+fn)
+    self.FPR = fp / (fp+tn)
+    self.TNR = tn / (fp+tn)
+
 
 def checkfloat(num):
     try:

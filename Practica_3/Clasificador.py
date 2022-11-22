@@ -266,7 +266,42 @@ class ClasificadorNaiveBayes(Clasificador):
         return diccionarioSolucion
         '''{clase = 1: (media,desviacion tipica),clase = 2: (media,desviacion tipica)}'''
         '''calcular media y desviacion tipica para cada valor de la clase '''
-       
+    
+    def score(self,datosTest,prediccion):
+        clases = datosTest.iloc[:,-1].to_numpy().astype('int64')
+        tp = 0
+        tn = 0
+        fp = 0
+        fn = 0
+        counter = 0
+        for elem in clases:
+            # print(f'{type(elem)}  ============== {type(prediccion[counter])}')
+            # print(f'real: {elem}  ============== pred: {prediccion[counter]}')
+            if elem == prediccion[counter]:
+                if elem == 1:
+                    # print("tp + 1\n")
+                    tp += 1
+                else:
+                    # print("tn + 1\n")
+                    tn += 1
+            else:
+                if elem == 1:
+                    # print("fn + 1\n")
+                    fn += 1 
+                else:
+                    # print("fp + 1\n")
+                    fp += 1
+            counter += 1
+
+        self.matrizConfusion[0][0] = int(tp)
+        self.matrizConfusion[0][1] = int(fp)
+        self.matrizConfusion[1][0] = int(fn)
+        self.matrizConfusion[1][1] = int(tn)
+
+        self.TPR = tp / (tp+fn)
+        self.FNR = fn / (tp+fn)
+        self.FPR = fp / (fp+tn)
+        self.TNR = tn / (fp+tn)
         
 
 def dist_normal(m,v,n):
