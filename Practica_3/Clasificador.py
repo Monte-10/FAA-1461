@@ -71,7 +71,7 @@ class Clasificador:
       clasificador.entrenamiento(datosTrain, dataset.nominalAtributos,laPlace, dataset.diccionario)
       #realizamos las predicciones y calculamos el error de cada particion.
       predicciones = clasificador.clasifica(datosTest, dataset.nominalAtributos, dataset.diccionario)
-      print(predicciones)
+      self.score(datosTest, predicciones)
       errores.append(self.error(datosTest, predicciones))
     #print(statistics.mean(errores))
     return errores                                                    
@@ -85,6 +85,7 @@ class ClasificadorNaiveBayes(Clasificador):
     
     def __init__(self) :
       super().__init__()
+      self.matrizConfusion = np.empty((2,2)) #¿asumo que los valores de clase siempre van a ser 0 y 1? De momento si. Inicializo con tam de matrix 2x2
 
     def entrenamiento(self,datosTrain ,nominalAtributos, laplace : boolean, datos):
       """Entrenamiento"""
@@ -266,7 +267,7 @@ class ClasificadorNaiveBayes(Clasificador):
         return diccionarioSolucion
         '''{clase = 1: (media,desviacion tipica),clase = 2: (media,desviacion tipica)}'''
         '''calcular media y desviacion tipica para cada valor de la clase '''
-    
+  
     def score(self,datosTest,prediccion):
         clases = datosTest.iloc[:,-1].to_numpy().astype('int64')
         tp = 0
@@ -275,21 +276,19 @@ class ClasificadorNaiveBayes(Clasificador):
         fn = 0
         counter = 0
         for elem in clases:
-            # print(f'{type(elem)}  ============== {type(prediccion[counter])}')
-            # print(f'real: {elem}  ============== pred: {prediccion[counter]}')
-            if elem == prediccion[counter]:
+            if elem == int(prediccion[counter]):
                 if elem == 1:
-                    # print("tp + 1\n")
+                    print("tp + 1\n")
                     tp += 1
                 else:
-                    # print("tn + 1\n")
+                    print("tn + 1\n")
                     tn += 1
             else:
                 if elem == 1:
-                    # print("fn + 1\n")
+                    print("fn + 1\n")
                     fn += 1 
                 else:
-                    # print("fp + 1\n")
+                    print("fp + 1\n")
                     fp += 1
             counter += 1
 
