@@ -1,61 +1,50 @@
 
 from Datos import Datos
 from Clasificador import *
-from ClasificadorKNN import *
 import EstrategiaParticionado as EstrategiaParticionado
-dataset = Datos('ConjuntosDatosP2/pima-indians-diabetes.csv')
-clasificador = ClasificadorKNN()
+dataset = Datos('ConjuntosDatosP2/wdbc.csv')
+# print(dataset.datos)
+# print(type(dataset.datos['Atr2']))
+# print(dataset.datos['Atr2'].mean())
 
-validacionSimple = EstrategiaParticionado.ValidacionSimple(10,5)
-K = 3
-errores = []
-for j in range(3):
-    validacionSimple.creaParticiones(dataset.datos)
+#print(dataset.datos["Class"][0]) #selecciona, de la columna Class, el valor que está en la fila 0
+#print(dataset.datos.keys())
+clasificador = ClasificadorNaiveBayes()
 
-
-    #print(dataset.extraeDatos(validacionSimple.particiones[0].indicesTest))
-
-    #clasificador.calcularMediaDesviacion(dataset.datos,dataset.nominalAtributos)
-    #clasificador.normalizarDatos(dataset.datos,dataset.nominalAtributos)#TODO: normaliza es muy lento, hay que ver que está pasando. Además que si le pasas un porcentaje de la tabla no esta normalizando despues esos campos
-    #print(f'Indices Test:\n{validacionSimple.particiones[0].indicesTest}')
-    #print(f'Indices Test:\n{dataset.extraeDatos(validacionSimple.particiones[0].indicesTest)}')
-    for i in range(5):
-        
-        predicciones = clasificador.clasifica(dataset.extraeDatos(validacionSimple.particiones[i].indicesTest), dataset.extraeDatos(validacionSimple.particiones[i].indicesTrain),dataset.nominalAtributos,K)
-        
-        #print(f'{dataset.extraeDatos(validacionSimple.particiones[i].indicesTest)} vs {predicciones}')
-        error = clasificador.error(dataset.extraeDatos(validacionSimple.particiones[i].indicesTest),predicciones)
-
-        #print(error)
-        errores.append(error) 
-print(f'Media de los errores sin normalizar: {np.mean(errores) * 100}%')
+validacionSimple = EstrategiaParticionado.ValidacionSimple(10,3)
+validacionCruzada = EstrategiaParticionado.ValidacionCruzada(4)
+# validacionSimple.creaParticiones(dataset.datos)
+# total = []
+# print(dataset.diccionario)
+#clasificador.entrenamiento(dataset.extraeDatos(validacionSimple.particiones[0].indicesTrain) , dataset.nominalAtributos, False,dataset.diccionario)
+#clasificador.entrenamiento(dataset.extraeDatos(validacionSimple), dataset.nominalAtributos, laplace=False)
 
 
 
-dataset.datos = clasificador.entrenamiento(dataset.datos, dataset.nominalAtributos)
+error = []
+for i in range(1):
+    error += clasificador.validacion(validacionCruzada, dataset, clasificador)
+print(error)
+print(statistics.mean(error))
+# print(np.std(error))
+
+# error = []
+# for i in range(20):
+#     error += clasificador.validacion(validacionSimple, dataset, clasificador)
+# print(statistics.mean(error))
+# print(statistics.stdev(error))
 
 
-# dataset = Datos('ConjuntosDatosP2/wdbc.csv')
-# clasificador = ClasificadorKNN()
+# error = []
+# for i in range(20):
+#     error += clasificador.validacion(validacionCruzada, dataset, clasificador, laPlace = True)
+# print(statistics.mean(error))
+# print(statistics.stdev(error))
 
+# error = []
+# for i in range(20):
+#     error += clasificador.validacion(validacionSimple, dataset, clasificador, laPlace = True)
+# print(statistics.mean(error))
+# print(statistics.stdev(error))
 
-
-errores = []
-for j in range(3):
-    dataset = Datos('ConjuntosDatosP2/pima-indians-diabetes.csv')
-    validacionSimple.creaParticiones(dataset.datos)
-    dataset.datos = clasificador.entrenamiento(dataset.datos, dataset.nominalAtributos)
-
-#print(dataset.extraeDatos(validacionSimple.particiones[0].indicesTest))
-#print(f'Indices Test:\n{validacionSimple.particiones[0].indicesTest}')
-#print(f'Indices Test:\n{dataset.extraeDatos(validacionSimple.particiones[0].indicesTest)}')
-    for i in range(5):
-    
-        predicciones = clasificador.clasifica(dataset.extraeDatos(validacionSimple.particiones[i].indicesTest), dataset.extraeDatos(validacionSimple.particiones[i].indicesTrain),dataset.nominalAtributos,K)
-        
-        #print(f'{dataset.extraeDatos(validacionSimple.particiones[i].indicesTest)} vs {predicciones}')
-        error = clasificador.error(dataset.extraeDatos(validacionSimple.particiones[i].indicesTest),predicciones)
-
-        #print(error)
-        errores.append(error) 
-print(f'Media de los errores normalizando: {np.mean(errores) * 100}%')
+#clasificador.validacion(validacionSimple, dataset, clasificador, laPlace = True)

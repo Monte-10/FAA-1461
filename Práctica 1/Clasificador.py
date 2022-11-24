@@ -72,6 +72,7 @@ class Clasificador:
       clasificador.entrenamiento(datosTrain, dataset.nominalAtributos,laPlace, dataset.diccionario)
       #realizamos las predicciones y calculamos el error de cada particion.
       predicciones = clasificador.clasifica(datosTest, dataset.nominalAtributos, dataset.diccionario)
+      print(predicciones)
       errores.append(self.error(datosTest, predicciones))
     #print(statistics.mean(errores))
     return errores                                                    
@@ -108,7 +109,7 @@ class ClasificadorNaiveBayes(Clasificador):
           #print("Creo tabla")
           tabla = np.zeros((len(values),len(clases)))
           for index,row in datosTrain.iterrows():
-            tabla[int(row[counter])-1,int(row[-1])-1] += 1
+            tabla[int(round((row[counter])))-1,int(round(row[-1]))-1] += 1
 
           if laplace is True:
             tabla += 1
@@ -123,7 +124,8 @@ class ClasificadorNaiveBayes(Clasificador):
             lista = []
             for index,row in datosTrain.iterrows():
               if(row[-1] == clase):
-                lista.append(int(row[counter]))
+                
+                lista.append(float((row[counter])))
             
             media = np.mean(lista)
             varianza = np.var(lista)
@@ -159,10 +161,10 @@ class ClasificadorNaiveBayes(Clasificador):
               ##print(ejsClase)
               ##print("Fila[j] -> " + str(fila[j]) )
               ##print("tablasolcion[j][Fila[j]] -> " + str(fila[j]) )
-              prod *= self.tablaSolucion[j][int(fila[j])-1][contClases] / ejsClase 
+              prod *= self.tablaSolucion[j][int(round(float(fila[j])))-1][contClases] / ejsClase 
             else:
               op1 = (1/(math.sqrt(2*math.pi*self.tablaSolucion[j][1][contClases])))
-              op2 = math.exp((-((int(fila[j]))-self.tablaSolucion[j][0][contClases]))/(2*self.tablaSolucion[j][1][contClases]))
+              op2 = math.exp((-((int(round(float(fila[j]))))-self.tablaSolucion[j][0][contClases]))/(2*self.tablaSolucion[j][1][contClases]))
               
               prod *= op1*op2
 

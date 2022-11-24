@@ -2,7 +2,7 @@
 from Datos import Datos
 from Clasificador import *
 import EstrategiaParticionado as EstrategiaParticionado
-dataset = Datos('ConjuntoDatos/german.csv')
+dataset = Datos('../Practica_3/ConjuntosDatosP2/wdbc.csv')
 # print(dataset.datos)
 # print(type(dataset.datos['Atr2']))
 # print(dataset.datos['Atr2'].mean())
@@ -22,11 +22,11 @@ validacionCruzada = EstrategiaParticionado.ValidacionCruzada(4)
 
 
 error = []
-for i in range(10):
+for i in range(1):
     error += clasificador.validacion(validacionCruzada, dataset, clasificador)
 print(error)
 print(statistics.mean(error))
-print(np.std(error))
+# print(np.std(error))
 
 # error = []
 # for i in range(20):
