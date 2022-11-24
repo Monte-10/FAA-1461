@@ -278,17 +278,13 @@ class ClasificadorNaiveBayes(Clasificador):
         for elem in clases:
             if elem == int(prediccion[counter]):
                 if elem == 1:
-                    print("tp + 1\n")
                     tp += 1
                 else:
-                    print("tn + 1\n")
                     tn += 1
             else:
                 if elem == 1:
-                    print("fn + 1\n")
                     fn += 1 
                 else:
-                    print("fp + 1\n")
                     fp += 1
             counter += 1
 

@@ -41,6 +41,7 @@ class RegresionLogistica(Clasificador):
                 if elem == 1:
                     # print("tp + 1\n")
                     tp += 1
+                    self.aciertos.append(1)
                 else:
                     # print("tn + 1\n")
                     tn += 1
@@ -48,6 +49,7 @@ class RegresionLogistica(Clasificador):
                 if elem == 1:
                     # print("fn + 1\n")
                     fn += 1 
+                    self.aciertos.append(0)
                 else:
                     # print("fp + 1\n")
                     fp += 1
@@ -62,6 +64,11 @@ class RegresionLogistica(Clasificador):
         self.FNR = fn / (tp+fn)
         self.FPR = fp / (fp+tn)
         self.TNR = tn / (fp+tn)
+        
+        self.TPRs.append(self.TPR)
+        self.FPRs.append(self.FPR)
+        
+        
 
 
 
@@ -139,6 +146,9 @@ class RegresionLogistica(Clasificador):
 
     def dameError(self,dataset,n_epocas,gradiente, normaliza):
         errores = []
+        self.TPRs = []
+        self.FPRs = []
+        self.aciertos = []
         
         if normaliza is True:
             dataset.datos = Datos.normalize(dataset.datos)
