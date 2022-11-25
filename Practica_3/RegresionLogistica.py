@@ -34,25 +34,25 @@ class RegresionLogistica(Clasificador):
         fp = 0
         fn = 0
         counter = 0
+        
+        clases[clases != 1] = 0
         for elem in clases:
-            # print(f'{type(elem)}  ============== {type(prediccion[counter])}')
-            # print(f'real: {elem}  ============== pred: {prediccion[counter]}')
             if elem == prediccion[counter]:
                 if elem == 1:
-                    # print("tp + 1\n")
+                    #print("tp + 1\n")
                     tp += 1
                 else:
-                    # print("tn + 1\n")
+                    #print("tn + 1\n")
                     tn += 1
             else:
                 if elem == 1:
-                    # print("fn + 1\n")
+                    #print("fn + 1\n")
                     fn += 1 
                 else:
-                    # print("fp + 1\n")
+                    #print("fp + 1\n")
                     fp += 1
             counter += 1
-
+    
         self.matrizConfusion[0][0] = int(tp)
         self.matrizConfusion[0][1] = int(fp)
         self.matrizConfusion[1][0] = int(fn)
@@ -65,7 +65,6 @@ class RegresionLogistica(Clasificador):
         
         self.TPRs.append(self.TPR)
         self.FPRs.append(self.FPR)
-        
 
     def entrenamiento(self,gradiente,num_epocas, datosTrain, nominalAtributos, diccionario):
         w = self.getVectorAleatorio(nominalAtributos)
@@ -166,7 +165,7 @@ class RegresionLogistica(Clasificador):
 
     
 if __name__ == '__main__':
-    dataset = Datos('/mnt/c/Users/alexm/Documents/FAA-1461/Practica_3/ConjuntosDatosP2/pima-indians-diabetes.csv')
+    dataset = Datos('ConjuntosDatosP2/wdbc.csv')
     rl = RegresionLogistica()
     n_epocas = 10
     gradiente = 1
