@@ -41,7 +41,6 @@ class RegresionLogistica(Clasificador):
                 if elem == 1:
                     # print("tp + 1\n")
                     tp += 1
-                    self.aciertos.append(1)
                 else:
                     # print("tn + 1\n")
                     tn += 1
@@ -49,7 +48,6 @@ class RegresionLogistica(Clasificador):
                 if elem == 1:
                     # print("fn + 1\n")
                     fn += 1 
-                    self.aciertos.append(0)
                 else:
                     # print("fp + 1\n")
                     fp += 1
@@ -68,11 +66,6 @@ class RegresionLogistica(Clasificador):
         self.TPRs.append(self.TPR)
         self.FPRs.append(self.FPR)
         
-        
-
-
-
-
 
     def entrenamiento(self,gradiente,num_epocas, datosTrain, nominalAtributos, diccionario):
         w = self.getVectorAleatorio(nominalAtributos)
@@ -148,7 +141,6 @@ class RegresionLogistica(Clasificador):
         errores = []
         self.TPRs = []
         self.FPRs = []
-        self.aciertos = []
         
         if normaliza is True:
             dataset.datos = Datos.normalize(dataset.datos)
