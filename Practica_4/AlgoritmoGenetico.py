@@ -56,6 +56,20 @@ class AG():
             comparison = andTotal == data
             if comparison.all():
                 print("es igual")
+                
+    def evaluaReglas(reglas, datos):
+        # Reglas es una lista de listas, donde cada lista es una regla
+        # Datos es una lista de listas, donde cada lista es un dato
+        # Devuelve una lista de 1 y 0, donde 1 es que la regla coincide con el dato y 0 es que no coincide
+        lista = []
+        for regla in reglas:
+            for dato in datos:
+                if (regla[0:-1] == dato[0:-1]).all():
+                    if regla[-1] == dato[-1]:
+                        lista.append(1)
+                    else:
+                        lista.append(0)
+        return lista
         
             
     # def dataComparationWithRules(data,rules): 
@@ -81,6 +95,7 @@ class AG():
     #                                                 ______________
     #                                                 01 00 1000 001
     #                                                 01 01 1000 001
+    
 
 
 
@@ -93,7 +108,7 @@ class AG():
     #     (pclass = 1 or pclass=2) and (sex=male) and (age = 3) then class = 1 acierto +1
 
 if __name__=='__main__':
-    dataset = Datos('/mnt/c/Users/alexm/Documents/FAA-1461/Practica_4/ConjuntosDatosP4/xor.csv')
+    dataset = Datos('/mnt/c/Users/Gervasia y Gervasio/Documents/GitHub/FAA-1461/Practica_4/ConjuntosDatosP4/xor.csv')
     
     validacionSimple = EstrategiaParticionado.ValidacionSimple(10,1)
     validacionSimple.creaParticiones(dataset.datos)
@@ -102,4 +117,4 @@ if __name__=='__main__':
     
     trans = AG.encodeAsOneHot(datosTrain)
     print(f'trans {trans[0]}')
-    AG.compareDataToRule(trans[0],np.array([[0,1,0,1,0,1],[1,1,1,1,1,1]]))
+    AG.evaluaReglas(trans[0],np.array([[0,1,0,1,0,1],[1,1,1,1,1,1]]))
