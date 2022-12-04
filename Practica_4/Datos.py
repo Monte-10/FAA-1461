@@ -48,7 +48,7 @@ class Datos:
             rows.append(row)
         for h in rows[0]:
             if(h.isnumeric() or isfloat(h)):
-                self.nominalAtributos.append(False)
+                self.nominalAtributos.append(True)
             elif isinstance(h, str):
                 self.nominalAtributos.append(True)
             else:

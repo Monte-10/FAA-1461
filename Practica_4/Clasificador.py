@@ -10,7 +10,7 @@ from functools import reduce
 from scipy.stats import norm
 import statistics
 
-class Clasificador:
+class Clasificador():
   
   # Clase abstracta
   __metaclass__ = ABCMeta
