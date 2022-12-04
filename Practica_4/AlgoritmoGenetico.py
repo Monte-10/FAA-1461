@@ -231,7 +231,7 @@ class AG(Clasificador):
 
     def clasifica(self,datosTest,individuo,diccionario=None):
         trans = AG.encodeAsOneHot(datosTest)
-        self.tam_regla = 5
+        
         # print(type(datosTest))
         # print(type(individuo))
         acierto = self.fitness(trans,individuo)
@@ -241,11 +241,11 @@ class AG(Clasificador):
         # reglas activadas y las clases correspondientes a esas
         # activaciones de forma similar al voto por mayoría de K-nn
         
-        pass
+        
 
 if __name__=='__main__':
-    dataset = Datos('ConjuntosDatosP4/xor.csv')
-    algoritmoGenetico = AG(0.2,50,3,0.95,50) #penultimo parametro -> proporcion de elitismo
+    dataset = Datos('ConjuntosDatosP4/titanic.csv')
+    algoritmoGenetico = AG(0.2,100,3,0.95,100) #penultimo parametro -> proporcion de elitismo
     
     validacionSimple = EstrategiaParticionado.ValidacionSimple(10,1)
     validacionSimple.creaParticiones(dataset.datos)
