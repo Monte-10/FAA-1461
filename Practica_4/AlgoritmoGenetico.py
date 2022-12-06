@@ -79,21 +79,26 @@ class AG(Clasificador):
             aciertoReglas = 0
             falloReglas = 0
             for rule in rules:
+                
+
                 #andTotal = np.zeros(len(rule)).astype(int)
                 andTotal = []
-                for i in range(len(dato)):
+                for i in range(len(dato)-1):
                     #np.append(andTotal,rule[i] and data[i]) 
                     andy = dato[i] and rule[i]
                     andTotal.append(andy)
-                    
-                
+                andTotal.append(rule[-1])    
+                # print(f'regla {rule} andy : {andTotal} dato {dato}')
                 comparison = np.array(andTotal[:-1]) == dato[:-1]
                 if comparison.all():
+                    #print(f'La regla {andTotal[:-1]} se activa para el dato {dato[:-1]}')
                     flagReglas=True
                     #En este punto, la regla se activa y entra a comparar el valor de la clase. Si acierto +1, si fallo error +1
                     if andTotal[-1] == dato[-1]:
+                        # print(f'ACIERTO')
                         aciertoReglas +=1 
                     else:
+                        # print(f'FALLO')
                         falloReglas +=1
 
             if flagReglas is True: #es decir, al menos una regla a entrado a valorar la clase
@@ -111,11 +116,13 @@ class AG(Clasificador):
         reglas = []
         lista = []
         i = 0
-        while i<len(individuo):
+        while i<len(individuo):#lo unico que hacemos aqui es elaborar el individuo como una regla de reglas de tal forma que luego podremos trabajar de ofrma independiente con cada regla
             lista = individuo[i:i+self.tam_regla]
             reglas.append(lista)
             i += (self.tam_regla)
+       
         acierto,error = self.compareDataToRule(datos,reglas)
+        #print(f'Vamos a estudiar el score de las reglas: {reglas} acierto:{acierto/(acierto+error)} error: {error/(acierto+error)}')
         return acierto/(acierto+error)
 
 
@@ -154,13 +161,16 @@ class AG(Clasificador):
         # Creacion de la poblacion inicial (# individuos) con el esquema propuesto: 
         # reglas de longitud fija y número de reglas variable por individuo
         descendientes = []
+        flagPrimerosIndividuos = False
         for n in range(self.n_generaciones):
             individuos = descendientes
             descendientes = []
             #print("entro")
-            for i in range(self.tam_poblacion):
-                individuos.append(self.generaPoblacion(datosTrain,diccionario))
-
+            if flagPrimerosIndividuos is False:
+                for i in range(self.tam_poblacion):
+                    individuos.append(self.generaPoblacion(datosTrain,diccionario))
+                    flagPrimerosIndividuos= True
+            # print(f"Los progenitores son : {individuos}")
             trans = AG.encodeAsOneHot(datosTrain)
             fitness_individuo = []
             for individuo in individuos:
@@ -183,23 +193,26 @@ class AG(Clasificador):
 
                 if all(el==1 for el in mut1) | all(el==0 for el in mut1):
                     if all(e==1 for e in descendiente1) | all(e==0 for e in descendiente1):
-                        descendientes.append(individuos[index1])        
+                        descendientes.append(individuos[index1])        #si tras mutar son todos 1's o 0's y tras combinar tambien lo fueron, nos quedamos con el progenitor
                         descendientes.append(individuos[index2])
                     else:
-                        descendientes.append(descendiente1)        
+                        descendientes.append(descendiente1)        #si tras mutar son todos 1's pero tras combinar no lo son, nos quedamos con la combinacion.
                         descendientes.append(descendiente2)
                 else:
-                    descendientes.append(mut1)
+                    descendientes.append(mut1)  
                     descendientes.append(mut2)
-        
+            # print(f'Los descendientes son : {descendientes}')
+
+        #tras todas las generaciones, nos quedamos con el mejor descendiente
         fitneses = []
         for descendiente in descendientes:
             fitneses.append(self.fitness(trans,descendiente))
 
         mejor = fitneses.index(max(fitneses))
 
-        #print(f'El mejor individuo tras train es: {descendientes[mejor]}')
-        
+        # print(f'El mejor individuo tras train es: {descendientes[mejor]}')
+        # print(f'Y tiene un score de: {fitneses[mejor]}')
+        # print(trans)
         return descendientes[mejor]
         
         
@@ -245,15 +258,15 @@ class AG(Clasificador):
 
 if __name__=='__main__':
     dataset = Datos('ConjuntosDatosP4/titanic.csv')
-    algoritmoGenetico = AG(0.2,100,3,0.95,100) #penultimo parametro -> proporcion de elitismo
+    algoritmoGenetico = AG(0.01,100,5,0.85,100) #penultimo parametro -> proporcion de arrastrar el mejor
     
-    validacionSimple = EstrategiaParticionado.ValidacionSimple(10,1)
+    validacionSimple = EstrategiaParticionado.ValidacionSimple(30,1) #reservamos poco para el train de forma temporal para debuggear
     validacionSimple.creaParticiones(dataset.datos)
     
     datosTrain = dataset.extraeDatos(validacionSimple.particiones[0].indicesTrain)
     datosTest = dataset.extraeDatos(validacionSimple.particiones[0].indicesTest)
 
-    print(datosTrain)
+    
     
     # print(trans)
     # print(f'trans {trans[0]}')
@@ -261,7 +274,10 @@ if __name__=='__main__':
     # print(f'trans {trans[2]}')
     
     mejor = algoritmoGenetico.entrenamiento(datosTrain,{},dataset.diccionario)
+    # print(f'El mejor es: {mejor} y lo puedes probar con el dataset')
     #mejor = np.array([1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1])
     algoritmoGenetico.clasifica(datosTest,mejor)
+
+    print(datosTrain)
 
     
