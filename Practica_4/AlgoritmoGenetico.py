@@ -69,7 +69,6 @@ class AG(Clasificador):
         return trans
 
     def compareDataToRule(self,data, rules):
-        clases = []
         acierto = 0
         error = 0
 
