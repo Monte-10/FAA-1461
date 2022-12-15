@@ -160,6 +160,9 @@ class AG(Clasificador):
         # Creacion de la poblacion inicial (# individuos) con el esquema propuesto: 
         # reglas de longitud fija y número de reglas variable por individuo
         descendientes = []
+        self.mediaMejor = []
+        self.mediaPoblacion = []
+        
         flagPrimerosIndividuos = False
         for n in range(self.n_generaciones):
             individuos = descendientes
@@ -206,8 +209,12 @@ class AG(Clasificador):
         fitneses = []
         for descendiente in descendientes:
             fitneses.append(self.fitness(trans,descendiente))
+            self.mediaMejor.append(max(fitneses))
+            self.mediaPoblacion.append(sum(fitneses)/len(fitneses))
+            
 
         mejor = fitneses.index(max(fitneses))
+        
 
         # print(f'El mejor individuo tras train es: {descendientes[mejor]}')
         # print(f'Y tiene un score de: {fitneses[mejor]}')
